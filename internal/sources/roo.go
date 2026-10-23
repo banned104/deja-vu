@@ -32,9 +32,9 @@ import (
 const RooExtensionID = "rooveterinaryinc.roo-cline"
 
 func RooRoots() []string {
-	if list := os.Getenv("DEJA_ROO_ROOTS"); list != "" {
+	if list := sourcePathOverride("DEJA_ROO_ROOTS"); list != "" {
 		var out []string
-		for _, p := range filepath.SplitList(list) {
+		for _, p := range sourcePathList("DEJA_ROO_ROOTS") {
 			if p != "" {
 				out = append(out, p)
 			}
@@ -228,7 +228,7 @@ func expandTilde(p string) string {
 // RooCLIRoot is where @roo-code/cli keeps tasks and settings: it runs the
 // extension against a VS Code shim whose storage base is ~/.vscode-mock.
 func RooCLIRoot() string {
-	if p := os.Getenv("DEJA_ROO_CLI_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_ROO_CLI_ROOT"); p != "" {
 		return p
 	}
 	return filepath.Join(Home(), ".vscode-mock", "global-storage")

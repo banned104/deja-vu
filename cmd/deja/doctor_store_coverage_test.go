@@ -17,6 +17,7 @@ import (
 // indexed, so it is what they are checked against (#1738, the shape of #999).
 func TestDoctorNamesEveryStoreTheIndexerReads(t *testing.T) {
 	tmp := hermeticEnv(t)
+	t.Setenv("DEJA_PI_DESKTOP_ROOT", filepath.Join(tmp, "desktop"))
 	dir := tmp + "/index.db"
 
 	var text bytes.Buffer

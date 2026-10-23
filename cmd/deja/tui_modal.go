@@ -37,6 +37,10 @@ func (a *tuiApp) openModal(m int) {
 }
 
 func (a *tuiApp) handleModal(ev tui.Event) {
+	if a.modal == modalPaths {
+		a.handlePaths(ev)
+		return
+	}
 	if a.modal == modalNews {
 		a.handleNews(ev)
 		return
@@ -200,6 +204,8 @@ func (a *tuiApp) drawModal() {
 	p.Recolor(0, 0, p.W, p.H, cFaint, cMantle)
 	a.zones = a.zones[:0]
 	switch a.modal {
+	case modalPaths:
+		a.drawPaths()
 	case modalContinue:
 		a.drawContinue()
 	case modalAgents:
@@ -306,7 +312,7 @@ type helpSection struct {
 func (a *tuiApp) drawHelp() {
 	p := a.p
 	secs := []helpSection{
-		{"FIND", [][2]string{{"type", "search as you type"}, {"tab", "this project / all / deleted"}, {"↑↓ 1-9", "pick a session"}, {"↑ on empty", "past searches"}, {"a", "filter by agent"}}},
+		{"FIND", [][2]string{{"type", "search as you type"}, {"tab", "this project / all / deleted"}, {"↑↓ 1-9", "pick a session"}, {"↑ on empty", "past searches"}, {"a", "filter by agent"}, {"P", "Agent history paths"}}},
 		{"READ", [][2]string{{"↵", "open at the match"}, {"/", "find in the session"}, {"n N", "next / previous match"}, {"] [", "next / previous turn"}, {"t", "unfold long messages"}, {"g G", "top / bottom"}, {"esc", "back to the list"}}},
 		{"ACT", [][2]string{{"r", "resume in its agent"}, {"o", "continue in any agent"}, {"c", "copy the context"}, {"D", "delete everywhere"}, {"R", "put a deleted one back"}, {"^k", "copy id, path, forget…"}}},
 	}

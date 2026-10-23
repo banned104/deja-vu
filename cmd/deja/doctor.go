@@ -1133,6 +1133,9 @@ func doctorHarnessStores(w io.Writer, dir string, all bool) {
 
 	piRoot := sources.PiRoot()
 	printFiles("pi", piRoot, doctorExists(piRoot), sources.PiSessionFiles())
+	if desktopRoot := sources.PiDesktopRoot(); desktopRoot != "" {
+		printFiles("pi-desktop", desktopRoot, doctorExists(desktopRoot), sources.PiDesktopSessionFiles())
+	}
 	openclawRoot := sources.OpenClawRoot()
 	printFilesBeside("openclaw", openclawRoot, doctorExists(openclawRoot), sources.OpenClawSessionFiles(), sources.OpenClawSidecarFiles()...)
 	for _, db := range sources.OpenClawAgentDBs() {

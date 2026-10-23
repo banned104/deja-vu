@@ -49,9 +49,9 @@ import (
 // set, else $XDG_DATA_HOME/muse/sessions where XDG_DATA_HOME is absolute, else
 // ~/.local/share/muse/sessions.
 func MuseRoots() []string {
-	if list := os.Getenv("DEJA_MUSE_ROOTS"); list != "" {
+	if list := sourcePathOverride("DEJA_MUSE_ROOTS"); list != "" {
 		var out []string
-		for _, p := range filepath.SplitList(list) {
+		for _, p := range sourcePathList("DEJA_MUSE_ROOTS") {
 			if p != "" {
 				out = append(out, p)
 			}

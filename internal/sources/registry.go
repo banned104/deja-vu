@@ -669,6 +669,13 @@ func harnessTable() []Harness {
 			}},
 		},
 		{
+			Name: "pi-desktop", Load: LoadPiDesktop, Files: PiDesktopSessionFiles,
+			Kinds: []FileKind{{
+				Name: "pi-desktop", Match: piDesktopFile,
+				Parse: fullParse(ParsePiDesktopFile), Sidecar: piDesktopSidecar,
+			}},
+		},
+		{
 			Name: "pi", Load: LoadPi, Files: PiSessionFiles,
 			Kinds: []FileKind{{
 				Name:      "pi",

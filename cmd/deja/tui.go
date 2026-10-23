@@ -42,6 +42,7 @@ const (
 	modalNews
 	modalForget
 	modalDelete
+	modalPaths
 )
 
 type tuiApp struct {
@@ -89,10 +90,11 @@ type tuiApp struct {
 	updates chan func()
 	bg      sync.WaitGroup // one-shot work off the event loop, see spawn
 
-	view   int
-	reader readerState
-	modal  int
-	m      modalState
+	view         int
+	reader       readerState
+	modal        int
+	m            modalState
+	pathSettings pathModalState
 
 	toast      string
 	toastGood  bool

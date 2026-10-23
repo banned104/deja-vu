@@ -43,7 +43,7 @@ func OmpRoot() string { return EnvPath("DEJA_OMP_ROOT", filepath.Join(OmpConfigD
 // default profile, each named profile, and their XDG counterparts when the user
 // has moved omp's data there.
 func OmpSessionRoots() []string {
-	if p := os.Getenv("DEJA_OMP_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_OMP_ROOT"); p != "" {
 		return []string{p}
 	}
 	home := filepath.Join(Home(), ".omp")
@@ -88,7 +88,7 @@ func ompProfileRoots(dir, middle string) []string {
 // listed for a path that names omp at all, since every file the index sees
 // passes through here.
 func underOmpRoot(p string) bool {
-	if os.Getenv("DEJA_OMP_ROOT") == "" && !strings.Contains(p, "omp") {
+	if sourcePathOverride("DEJA_OMP_ROOT") == "" && !strings.Contains(p, "omp") {
 		return false
 	}
 	for _, root := range OmpSessionRoots() {

@@ -38,7 +38,7 @@ func ZCodeRoot() string {
 // ZCodeDB is the CLI's SQLite store. DEJA_ZCODE_DB overrides the path outright,
 // the way DEJA_KILO_DB does for Kilo's.
 func ZCodeDB() string {
-	if p := os.Getenv("DEJA_ZCODE_DB"); p != "" {
+	if p := sourcePathOverride("DEJA_ZCODE_DB"); p != "" {
 		return p
 	}
 	return filepath.Join(ZCodeConfigDir(), "cli", "db", "db.sqlite")

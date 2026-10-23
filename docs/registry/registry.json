@@ -2,6 +2,23 @@
   "schema_version": 1,
   "harnesses": [
     {
+      "id": "pi-desktop",
+      "display_name": "PI-Desktop",
+      "store_paths": ["${DEJA_PI_DESKTOP_ROOT}/sessions/*.jsonl", "${DEJA_PI_DESKTOP_ROOT}/pi.sqlite"],
+      "format_kind": "jsonl-with-sqlite-metadata",
+      "fixture_paths": ["fixtures/registry/pi-desktop/desktop-demo.jsonl"],
+      "parser_source": "internal/sources/pi_desktop.go",
+      "last_verified": "2026-10-22",
+      "capabilities": {"mcp": false, "auto": false, "skill": false, "command": false, "resume": false, "handoff": "paste", "prereq": "Explicit data root; separate local PI plugin"},
+      "gaps": {
+        "mcp": {"state": "impossible", "why": "The deja installer does not own Desktop configuration; the separately imported local PI plugin declares its MCP server with explicit consent."},
+        "auto": {"state": "impossible", "why": "The deja installer does not install trusted Desktop extensions; the independent local PI plugin adapts lifecycle hooks after explicit import."},
+        "skill": {"state": "impossible", "why": "This integration deliberately does not install a global skill; the local plugin uses the host's MCP catalogue and its own trusted extension."},
+        "command": {"state": "impossible", "why": "No Desktop slash command is shipped by the deja installer; use the local plugin MCP tool or the existing deja command line interface."},
+        "resume": {"state": "impossible", "why": "No verified Desktop command-line resume contract is implemented; native session identifiers must not be passed to pi CLI as substitutes."}
+      }
+    },
+    {
       "id": "aider",
       "store_paths": [
         "~/.aider.chat.history.md",

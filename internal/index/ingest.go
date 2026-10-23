@@ -537,6 +537,9 @@ func ensureHeld(dir string, harness string, force bool, progress io.Writer) erro
 }
 
 func ensureHeldFrom(dir string, harness string, force bool, progress io.Writer, c *FreshCheck) error {
+	if err := sources.SourcePathSettingsError(); err != nil {
+		return err
+	}
 	sweepStaleTmp(dir)
 	// The manifest is read before the walk so unchanged files can carry
 	// their derived state forward instead of being re-read. Only read here:
@@ -698,6 +701,9 @@ func Unwritable(err error) bool {
 
 // ensureLocked is the body of an Ensure, with the lock already held.
 func ensureLocked(dir string, o query.Options, force bool, progress io.Writer) error {
+	if err := sources.SourcePathSettingsError(); err != nil {
+		return err
+	}
 	sweepStaleTmp(dir)
 	// Cached, and only read: the search that follows reads the same one, and
 	// decoding it twice was most of the manifest's cost to a search (#5386).
@@ -773,6 +779,9 @@ func EnsureForSearchCoverage(dir string, o query.Options, progress io.Writer) (C
 func ensureForSearchStale(dir string, o query.Options, progress io.Writer) (bool, int, int, error) {
 	if autoUpdatesOff() {
 		return false, 0, 0, manualCheck(dir)
+	}
+	if err := sources.SourcePathSettingsError(); err != nil {
+		return false, 0, 0, err
 	}
 	// The wait before an answer is made of three things — taking the lock,
 	// walking the stores to see what changed, and ingesting whatever did — and

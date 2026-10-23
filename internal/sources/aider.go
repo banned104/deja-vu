@@ -51,7 +51,7 @@ func AiderFiles() []string {
 	add(filepath.Join(Home(), aiderHistoryName))
 	// aider maps every flag to an env var; --chat-history-file is the
 	// documented way to move the history off the default name.
-	if p := os.Getenv("AIDER_CHAT_HISTORY_FILE"); p != "" {
+	if p := sourcePathOverride("AIDER_CHAT_HISTORY_FILE"); p != "" {
 		add(p)
 	}
 	// aider writes the history at the git root it runs in, so $HOME holds one
@@ -60,7 +60,7 @@ func AiderFiles() []string {
 	for _, dir := range aiderProjects() {
 		add(filepath.Join(dir, aiderHistoryName))
 	}
-	for _, root := range filepath.SplitList(os.Getenv("DEJA_AIDER_ROOTS")) {
+	for _, root := range sourcePathList("DEJA_AIDER_ROOTS") {
 		if root == "" {
 			continue
 		}

@@ -44,6 +44,7 @@ func (a *tuiApp) paletteItems() []paletteItem {
 		}
 	}
 	add("Filter by agent…", "a", func() { a.openModal(modalAgents) })
+	add("Agent history paths…", "P", a.openPaths)
 	if len(a.filter) > 0 {
 		add("Show every agent", "", func() { a.filter = map[string]bool{}; a.reload() })
 	}

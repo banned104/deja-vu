@@ -26,9 +26,9 @@ import (
 // when both exist the index lists only the .jsonl.
 
 func CopilotChatRoots() []string {
-	if list := os.Getenv("DEJA_COPILOT_CHAT_ROOTS"); list != "" {
+	if list := sourcePathOverride("DEJA_COPILOT_CHAT_ROOTS"); list != "" {
 		var out []string
-		for _, p := range filepath.SplitList(list) {
+		for _, p := range sourcePathList("DEJA_COPILOT_CHAT_ROOTS") {
 			if p != "" {
 				out = append(out, p)
 			}

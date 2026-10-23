@@ -47,7 +47,7 @@ import (
 // Support/JetBrains, %APPDATA%\JetBrains, or $XDG_CONFIG_HOME/JetBrains.
 // DEJA_JETBRAINS_ROOT replaces it.
 func JetBrainsRoot() string {
-	if v := os.Getenv("DEJA_JETBRAINS_ROOT"); v != "" {
+	if v := sourcePathOverride("DEJA_JETBRAINS_ROOT"); v != "" {
 		return v
 	}
 	switch runtime.GOOS {

@@ -435,9 +435,9 @@ var handoffAlias = map[string]string{
 
 // handoffPasteOnly mirrors the registry's `handoff: paste` entries; the
 // capability drift test keeps the two in sync.
-// Roo, Zed, Cherry Studio, JetBrains AI Assistant and Windsurf run the agent
-// inside the app, so there is no command line to hand a prompt to.
-var handoffPasteOnly = map[string]bool{"roo": true, "cherrystudio": true, "zed": true, "jetbrains": true, "windsurf": true}
+// Desktop-hosted agents have no verified command line for handing over prompts.
+// PI-Desktop uses the same explicit copy/paste path rather than pi CLI resume.
+var handoffPasteOnly = map[string]bool{"pi-desktop": true, "roo": true, "cherrystudio": true, "zed": true, "jetbrains": true, "windsurf": true}
 
 // pasteOnlyFooter ends a handoff printed for pasting. It named all of
 // handoffTargets inline, a four-line wall at 80 columns; the agents a reader

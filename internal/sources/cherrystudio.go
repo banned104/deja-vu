@@ -44,9 +44,9 @@ import (
 // CherryStudioRoots are the transcript roots of a Cherry Studio install.
 // DEJA_CHERRYSTUDIO_ROOTS replaces the list.
 func CherryStudioRoots() []string {
-	if list := os.Getenv("DEJA_CHERRYSTUDIO_ROOTS"); list != "" {
+	if list := sourcePathOverride("DEJA_CHERRYSTUDIO_ROOTS"); list != "" {
 		var out []string
-		for _, p := range filepath.SplitList(list) {
+		for _, p := range sourcePathList("DEJA_CHERRYSTUDIO_ROOTS") {
 			if p != "" {
 				out = append(out, p)
 			}
@@ -84,7 +84,7 @@ func cherryStudioPiRoots() []string { return cherryStudioAgentRoots(".pi") }
 func cherryStudioDshRoots() []string { return cherryStudioAgentRoots(".dsh") }
 
 func cherryStudioAgentRoots(agent string) []string {
-	if os.Getenv("DEJA_CHERRYSTUDIO_ROOTS") != "" {
+	if sourcePathOverride("DEJA_CHERRYSTUDIO_ROOTS") != "" {
 		return nil
 	}
 	var out []string
@@ -340,7 +340,7 @@ func ParseCherryStudioFileFromOffset(path string, offset int64) ([]model.Session
 // registry can claim it without stealing a stock Claude transcript.
 func CherryStudioUnderRoot(p string) bool {
 	sep := string(filepath.Separator)
-	if os.Getenv("DEJA_CHERRYSTUDIO_ROOTS") == "" && !strings.Contains(p, sep+".claude"+sep) {
+	if sourcePathOverride("DEJA_CHERRYSTUDIO_ROOTS") == "" && !strings.Contains(p, sep+".claude"+sep) {
 		return false
 	}
 	for _, root := range CherryStudioRoots() {

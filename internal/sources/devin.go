@@ -81,6 +81,9 @@ func DevinSessionsDB() string {
 // DevinLegacySessionsDB is the name older builds used for the same store;
 // the binary still names both, so an un-migrated data directory is still read.
 func DevinLegacySessionsDB() string {
+	if sourcePathOverride("DEJA_DEVIN_DB") != "" {
+		return ""
+	}
 	return filepath.Join(devinDataDir(), "cli", "cli_sessions.db")
 }
 

@@ -26,10 +26,10 @@ import (
 // moves it; with DEJA_CLAUDE_ROOT set and no file named there is none, so a
 // stand pinned to its own store does not read the machine's prompts.
 func ClaudeHistoryFile() string {
-	if p := os.Getenv("DEJA_CLAUDE_HISTORY_FILE"); p != "" {
+	if p := sourcePathOverride("DEJA_CLAUDE_HISTORY_FILE"); p != "" {
 		return p
 	}
-	if os.Getenv("DEJA_CLAUDE_ROOT") != "" {
+	if sourcePathOverride("DEJA_CLAUDE_ROOT") != "" {
 		return ""
 	}
 	return filepath.Join(ClaudeConfigDir(), "history.jsonl")

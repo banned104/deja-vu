@@ -24,7 +24,7 @@ import (
 // while opencode is started without it leaves the store in the default
 // directory, so that one is read when the XDG one does not exist.
 func OpencodeDB() string {
-	if p := os.Getenv("DEJA_OPENCODE_DB"); p != "" {
+	if p := sourcePathOverride("DEJA_OPENCODE_DB"); p != "" {
 		return p
 	}
 	def := filepath.Join(Home(), ".local", "share", "opencode")

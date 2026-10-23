@@ -27,7 +27,7 @@ var antigravityUserBlockREs = []*regexp.Regexp{
 }
 
 func AntigravityRoots() []string {
-	if v := os.Getenv("DEJA_ANTIGRAVITY_ROOT"); v != "" {
+	if v := sourcePathOverride("DEJA_ANTIGRAVITY_ROOT"); v != "" {
 		return []string{v}
 	}
 	roots, err := filepath.Glob(filepath.Join(Home(), ".gemini", "antigravity*"))

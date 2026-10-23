@@ -24,7 +24,7 @@ func HermesHome() string {
 // Hermes keeps one SQLite store per profile under ~/.hermes/profiles/<name>,
 // so a user running several profiles has several stores and all of them count.
 func HermesProfilesRoot() string {
-	if p := os.Getenv("DEJA_HERMES_PROFILES_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_HERMES_PROFILES_ROOT"); p != "" {
 		return p
 	}
 	return filepath.Join(HermesHome(), "profiles")
@@ -33,7 +33,7 @@ func HermesProfilesRoot() string {
 // HermesDBs lists every profile store that exists and has content. A single
 // store can be forced with DEJA_HERMES_DB, which is what the tests use.
 func HermesDBs() []string {
-	if p := os.Getenv("DEJA_HERMES_DB"); p != "" {
+	if p := sourcePathOverride("DEJA_HERMES_DB"); p != "" {
 		if fi, err := os.Stat(p); err == nil && fi.Size() > 0 {
 			return []string{p}
 		}
@@ -552,7 +552,7 @@ func HermesResumeProfile(db string) (name string, dir bool) {
 		root, inProfile = filepath.Dir(filepath.Dir(root)), true
 	}
 	profiles := filepath.Join(root, "profiles")
-	if p := os.Getenv("DEJA_HERMES_PROFILES_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_HERMES_PROFILES_ROOT"); p != "" {
 		profiles = hermesAbs(p)
 	}
 	store := hermesAbs(filepath.Dir(db))

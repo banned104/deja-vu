@@ -36,9 +36,9 @@ const KiloExtensionID = "kilocode.kilo-code"
 // KiloRoots are the globalStorage directories the extension may write to, in
 // the same host order as RooRoots. DEJA_KILO_ROOTS replaces the list.
 func KiloRoots() []string {
-	if list := os.Getenv("DEJA_KILO_ROOTS"); list != "" {
+	if list := sourcePathOverride("DEJA_KILO_ROOTS"); list != "" {
 		var out []string
-		for _, p := range filepath.SplitList(list) {
+		for _, p := range sourcePathList("DEJA_KILO_ROOTS") {
 			if p != "" {
 				out = append(out, p)
 			}
@@ -77,7 +77,7 @@ func ParseKiloTask(path string) ([]model.Session, error) {
 // KiloDB is the CLI's SQLite store. XDG_DATA_HOME moves it the way it moves
 // OpenCode's; DEJA_KILO_DB overrides the path outright.
 func KiloDB() string {
-	if p := os.Getenv("DEJA_KILO_DB"); p != "" {
+	if p := sourcePathOverride("DEJA_KILO_DB"); p != "" {
 		return p
 	}
 	base := filepath.Join(Home(), ".local", "share")

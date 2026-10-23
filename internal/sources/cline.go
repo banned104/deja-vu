@@ -49,7 +49,7 @@ func ClineConfigDir() string {
 // ClineSessionsDir is the modern shared session store. DEJA_CLINE_ROOT
 // relocates reads only, mirroring every other harness.
 func ClineSessionsDir() string {
-	if p := os.Getenv("DEJA_CLINE_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_CLINE_ROOT"); p != "" {
 		return p
 	}
 	if p := os.Getenv("CLINE_SESSION_DATA_DIR"); p != "" {
@@ -70,9 +70,9 @@ func ClineMCPSettingsPath() string {
 // global-storage directories. The extension has no native relocation
 // variable, so DEJA_CLINE_ROOTS (a path list) is the read override.
 func ClineLegacyRoots() []string {
-	if list := os.Getenv("DEJA_CLINE_ROOTS"); list != "" {
+	if list := sourcePathOverride("DEJA_CLINE_ROOTS"); list != "" {
 		var out []string
-		for _, p := range filepath.SplitList(list) {
+		for _, p := range sourcePathList("DEJA_CLINE_ROOTS") {
 			if p != "" {
 				out = append(out, p)
 			}

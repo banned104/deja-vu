@@ -26,6 +26,10 @@ func (a *tuiApp) handle(ev tui.Event) {
 		a.quit = true
 		return
 	}
+	if a.modal == modalNone && ev.Kind == tui.EvKey && ev.Key == tui.KeyRune && ev.Rune == 'P' {
+		a.openPaths()
+		return
+	}
 	switch {
 	case a.modal != modalNone:
 		a.handleModal(ev)

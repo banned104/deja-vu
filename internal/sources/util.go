@@ -66,7 +66,7 @@ func ConfigHome() string {
 func ConfigDir() string { return filepath.Join(ConfigHome(), "deja") }
 
 func EnvPath(k, def string) string {
-	if v := os.Getenv(k); v != "" {
+	if v := sourcePathOverride(k); v != "" {
 		return v
 	}
 	return def

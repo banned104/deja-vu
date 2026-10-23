@@ -230,6 +230,7 @@ var commands = map[string]command{
 	"-h":        cmdHelp,
 	"--version": cmdVersion,
 	"-version":  cmdVersion,
+	"paths":     cmdPaths,
 	"sources": func(dir string, rest []string) error {
 		// The command takes nothing, and --json exists on seven of its
 		// neighbours — a script that reaches for it here got the
@@ -406,6 +407,11 @@ func run(args []string) error {
 	// mistake. Checked once, before any command runs.
 	if err := sources.StoresSelectionError(); err != nil {
 		return err
+	}
+	if name == "index" || name == "warmup" {
+		if err := sources.SourcePathSettingsError(); err != nil {
+			return err
+		}
 	}
 	if len(args) == 0 {
 		// briefWanted, not logoWanted: a reader who turned colour off still

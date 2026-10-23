@@ -1,0 +1,6 @@
+{"type":"session","schema":1,"sessionId":"desktop-demo","createdAt":"2026-10-01T09:00:00Z"}
+{"type":"message","id":"u1","role":"user","createdAt":"2026-10-01T09:00:01Z","blocks":[{"type":"text","text":"How should we handle quartz-token cache invalidation?"}]}
+{"type":"message","id":"a1","role":"assistant","createdAt":"2026-10-01T09:00:02Z","blocks":[{"type":"thinking","text":"PRIVATE_REASONING_NOT_INDEXED"},{"type":"text","text":"Decided to invalidate quartz-token by version, not by time."}]}
+{"type":"message","id":"t1","role":"tool","createdAt":"2026-10-01T09:00:03Z","blocks":[{"type":"tool_call","callId":"c1","name":"Bash","args":{"command":"go test ./cache"},"result":{"exitCode":1,"stdout":"undefined: cacheEpoch"},"status":"error","isError":true,"text":"undefined: cacheEpoch"}]}
+{"type":"message","id":"t2","role":"tool","createdAt":"2026-10-01T09:00:04Z","blocks":[{"type":"tool_call","callId":"c2","name":"Read","args":{"file_path":"cache/epoch.go"},"status":"success","text":"package cache"}]}
+{"type":"compaction","id":"cp1","createdAt":"2026-10-01T09:00:05Z","summary":"Keep quartz-token invalidation tied to version. Verify cacheEpoch next."}

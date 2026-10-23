@@ -223,11 +223,11 @@ func (a *tuiApp) drawFooter() {
 	case a.view == viewReader:
 		keys = [][2]string{{"↑↓", "scroll"}, {"/", "find"}, {"n N", "next hit"}, {"[ ]", "turns"}, {"r", "resume"}, {"o", "continue in…"}, {"t", "full messages"}, {"c", "copy"}, {"esc", "back"}}
 	case a.listFocus && len(a.rows) > 0:
-		keys = [][2]string{{"↵", "read"}, {"r", "resume"}, {"o", "continue in…"}, {"c", "copy context"}, {"a", "agents"}, {"/", "search"}, {"?", "help"}}
+		keys = [][2]string{{"↵", "read"}, {"r", "resume"}, {"o", "continue in…"}, {"a", "agents"}, {"P", "paths"}, {"/", "search"}, {"?", "help"}}
 	case len(a.query) > 0:
 		keys = [][2]string{{"↑↓", "pick"}, {"↵", "read"}, {"tab", "scope"}, {"^o", "continue in…"}, {"^k", "commands"}, {"esc", "clear"}}
 	default:
-		keys = [][2]string{{"type", "search"}, {"↑↓", "pick"}, {"↵", "read"}, {"tab", "scope"}, {"^k", "commands"}, {"?", "help"}, {"esc", "quit"}}
+		keys = [][2]string{{"type", "search"}, {"↑↓", "pick"}, {"P", "paths"}, {"tab", "scope"}, {"^k", "commands"}, {"?", "help"}, {"esc", "quit"}}
 	}
 	// The last key is the way out, and it keeps the right edge: at 80 columns
 	// the hints ran out before it, so the one key nobody should have to guess

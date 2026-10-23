@@ -96,7 +96,7 @@ func GooseRoot() string { return EnvPath("DEJA_GOOSE_ROOT", GooseDataDir()) }
 // GooseRoots are the data roots to read. DEJA_GOOSE_ROOT names one and then it
 // is the whole answer, the way DEJA_CODEX_ROOT is for Codex.
 func GooseRoots() []string {
-	if p := os.Getenv("DEJA_GOOSE_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_GOOSE_ROOT"); p != "" {
 		return []string{p}
 	}
 	return GooseDataDirs()
@@ -127,7 +127,7 @@ func GooseDB() string {
 
 // GooseDBs are the SQLite stores of every candidate root.
 func GooseDBs() []string {
-	if p := os.Getenv("DEJA_GOOSE_DB"); p != "" {
+	if p := sourcePathOverride("DEJA_GOOSE_DB"); p != "" {
 		return []string{p}
 	}
 	dirs := GooseSessionsDirs()

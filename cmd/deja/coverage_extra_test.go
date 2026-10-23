@@ -37,6 +37,8 @@ func hermeticEnv(t *testing.T) string {
 	home := filepath.Join(tmp, "home")
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
+	t.Setenv("DEJA_SOURCE_PATHS_FILE", filepath.Join(home, ".config", "deja", "source-paths.json"))
+	t.Setenv("PI_DESKTOP_DATA_DIR", "")
 	// Hermes's own switch moves deja with it (#3203): pinned so a developer
 	// with HERMES_HOME exported never has a test read or write their Hermes.
 	t.Setenv("HERMES_HOME", "")
@@ -46,6 +48,7 @@ func hermeticEnv(t *testing.T) string {
 	// pi's agent directory moves with PI_CODING_AGENT_DIR, and deja follows it.
 	t.Setenv("PI_CODING_AGENT_DIR", "")
 	t.Setenv("PI_CODING_AGENT_SESSION_DIR", "")
+	t.Setenv("DEJA_PI_DESKTOP_ROOT", "")
 	// And a pi that says nothing shadows the developer's own: its version
 	// decides what install and doctor say about pi's MCP.
 	shadow := t.TempDir()

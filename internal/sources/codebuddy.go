@@ -72,9 +72,9 @@ func CodeBuddyRoot() string { return filepath.Join(CodeBuddyConfigDir(), "projec
 // CodeBuddyRoots is every store to walk: CodeBuddy's, and each WorkBuddy one
 // that exists. DEJA_CODEBUDDY_ROOTS, a path list, replaces both.
 func CodeBuddyRoots() []string {
-	if list := os.Getenv("DEJA_CODEBUDDY_ROOTS"); list != "" {
+	if list := sourcePathOverride("DEJA_CODEBUDDY_ROOTS"); list != "" {
 		var out []string
-		for _, p := range filepath.SplitList(list) {
+		for _, p := range sourcePathList("DEJA_CODEBUDDY_ROOTS") {
 			if p != "" {
 				out = append(out, p)
 			}

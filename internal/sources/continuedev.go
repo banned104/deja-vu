@@ -31,7 +31,7 @@ import (
 
 // ContinueRoot is where Continue keeps its state.
 func ContinueRoot() string {
-	if p := os.Getenv("DEJA_CONTINUE_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_CONTINUE_ROOT"); p != "" {
 		return p
 	}
 	return EnvPath("CONTINUE_GLOBAL_DIR", filepath.Join(Home(), ".continue"))

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<script>document.documentElement.className=document.documentElement.className.replace("no-js","js")</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where PI-Desktop stores its history — session format</title>
+<meta name="description" content="Where PI-Desktop writes its conversation history on disk, what the files contain, the quirks deja found in them, and when the format was last verified against a real store.">
+<link rel="canonical" href="https://vshulcz.github.io/deja-vu/registry/pi-desktop.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Where PI-Desktop stores its history — session format">
+<meta property="og:description" content="Where PI-Desktop writes its conversation history on disk, what the files contain, the quirks deja found in them, and when the format was last verified against a real store.">
+<meta property="og:url" content="https://vshulcz.github.io/deja-vu/registry/pi-desktop.html">
+<meta property="og:image" content="https://vshulcz.github.io/deja-vu/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" sizes="16x16" href="../assets/favicon.svg">
+<link rel="icon" type="image/svg+xml" sizes="any" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+<meta name="author" content="vshulcz">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<meta name="theme-color" content="#0d0b16">
+<meta name="color-scheme" content="dark light">
+<meta property="og:site_name" content="deja-vu">
+<meta name="twitter:title" content="Where PI-Desktop stores its history — session format">
+<meta name="twitter:description" content="Where PI-Desktop writes its conversation history on disk, what the files contain, the quirks deja found in them, and when the format was last verified against a real store.">
+<meta name="twitter:image" content="https://vshulcz.github.io/deja-vu/assets/og.png">
+<link rel="apple-touch-icon" href="../assets/icon.svg">
+<link rel="sitemap" type="application/xml" href="https://vshulcz.github.io/deja-vu/sitemap.xml">
+<link rel="describedby" type="text/markdown" href="https://vshulcz.github.io/deja-vu/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","author":{"@type":"Person","name":"vshulcz"},"description":"Where PI-Desktop writes its conversation history on disk, what the files contain, the quirks deja found in them, and when the format was last verified against a real store.","headline":"PI-Desktop","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"deja-vu","url":"https://vshulcz.github.io/deja-vu/"},"publisher":{"@type":"Person","name":"vshulcz"},"url":"https://vshulcz.github.io/deja-vu/registry/pi-desktop.html"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://vshulcz.github.io/deja-vu/","name":"deja-vu","position":1},{"@type":"ListItem","item":"https://vshulcz.github.io/deja-vu/guide/harnesses.html","name":"Harnesses","position":2},{"@type":"ListItem","item":"https://vshulcz.github.io/deja-vu/registry/pi-desktop.html","name":"PI-Desktop","position":3}]}</script>
+</head>
+<body>
+<div class="glow"></div>
+<nav><a class="brand" href="../"><img src="../assets/icon.svg" alt="" width="22" height="22">deja-vu</a><span class="spacer"></span><a class="lnk" href="../">Home</a><a class="lnk" href="../guide/getting-started.html">Docs</a><a class="lnk" href="https://github.com/vshulcz/deja-vu">GitHub</a></nav>
+<div class="wrap"><div class="doc">
+<aside><a href="../">&larr; deja-vu</a><div class="grp">Guide</div><a href="../guide/getting-started.html">Getting started</a><a href="../guide/harnesses.html">Harnesses</a><div class="grp">Session formats</div><a href="README.html">All formats</a><a href="aider.html">aider</a><a href="amp.html">Amp</a><a href="antigravity.html">Antigravity</a><a href="cherrystudio.html">Cherry Studio</a><a href="claude-code.html">Claude Code</a><a href="cline.html">Cline</a><a href="codebuddy.html">CodeBuddy Code</a><a href="codewhale.html">CodeWhale</a><a href="codex.html">Codex CLI</a><a href="commandcode.html">Command Code</a><a href="continue.html">Continue</a><a href="copilot.html">Copilot CLI</a><a href="crush.html">Crush</a><a href="cursor.html">Cursor</a><a href="deepseek.html">DeepSeek Harness</a><a href="devin.html">Devin CLI</a><a href="gjc.html">gajae-code</a><a href="gemini.html">Gemini CLI</a><a href="goose.html">Goose</a><a href="grok.html">Grok Build</a><a href="hermes.html">Hermes</a><a href="jetbrains.html">JetBrains AI Assistant</a><a href="junie.html">Junie</a><a href="kilocode.html">Kilo Code</a><a href="kimchi.html">Kimchi Coding</a><a href="kimi.html">Kimi Code</a><a href="kiro.html">Kiro</a><a href="muse.html">Muse Code</a><a href="omp.html">omp (Oh My Pi)</a><a href="openclaw.html">OpenClaw</a><a href="opencode.html">opencode</a><a href="pi.html">pi</a><a href="pi-desktop.html" aria-current="page">PI-Desktop</a><a href="prime.html">prime-agent (PrimeIntellect)</a><a href="qwen.html">Qwen Code</a><a href="reasonix.html">Reasonix</a><a href="roo.html">Roo Code</a><a href="senpi.html">Senpi</a><a href="trae.html">TRAE CLI</a><a href="copilot-chat.html">VS Code Copilot Chat</a><a href="windsurf.html">Windsurf / Devin Desktop</a><a href="zcode.html">ZCode</a><a href="zed.html">Zed</a></aside>
+<article>
+<h1>PI-Desktop</h1>
+<p><strong>Last verified:</strong> 2026-10-22 (source and synthetic fixture; no private store)</p>
+<p>Verified against local PI-Desktop fc8d396ce (transcript schema 1).</p>
+<h2 id="discovery-and-consent">Discovery and consent</h2>
+<p>Root precedence: <code>DEJA_PI_DESKTOP_ROOT</code>, shared user Agent paths settings,</p>
+<p><code>PI_DESKTOP_DATA_DIR</code>, the host&#39;s <code>storage-location.json</code> migration pointer,</p>
+<p>then <code>~/.pi-desktop</code>. An explicit missing root or malformed pointer does not</p>
+<p>fall back to stale history. Only one active installation is selected.</p>
+<p>Open the terminal&#39;s <strong>P</strong> Agent paths page, or run <code>deja paths show pi-desktop</code></p>
+<p>and <code>deja paths set pi-desktop data &lt;absolute-data-dir&gt;</code>. See</p>
+<p><a href="../SOURCE-PATHS.html"><code>../SOURCE-PATHS.md</code></a>. <code>DEJA_STORES=pi-desktop,notes</code> and an</p>
+<p>independent <code>DEJA_INDEX_DIR</code> isolate integration tests. sqlite3 must be on PATH.</p>
+<p>Reads flat <code>sessions/&lt;id&gt;.jsonl</code> and, read-only, the corresponding <code>sessions</code></p>
+<p>and <code>projects</code> rows in <code>pi.sqlite</code>. Database and WAL stat changes invalidate</p>
+<p>transcript metadata. Revisions, inflight checkpoints, soft-deleted sessions,</p>
+<p>orphan transcripts and native pi sessions are not separate sources here.</p>
+<h2 id="records">Records</h2>
+<p>The header is <code>{type:session,schema:1,sessionId,createdAt}</code>. Message records</p>
+<p>carry <code>id</code>, <code>role</code>, <code>createdAt</code> and a canonical <code>blocks</code> array. Duplicate IDs</p>
+<p>are last-write-wins. Text blocks become speech; thinking and attachments are</p>
+<p>not indexed. Tool rows contain <code>tool_call</code> blocks with name/args/result/status;</p>
+<p>commands, file paths and tool output retain their roles and explicit exit codes.</p>
+<p>Compaction records retain their summary. Nested delegate rows are skipped.</p>
+<p>Only a torn last line is ignored. Unknown schema, identity mismatch and malformed</p>
+<p>complete records are errors rather than successful empty histories. Files are</p>
+<p>re-read whole on change: regeneration and duplicate IDs make append parsing unsafe.</p>
+<h2 id="integration-and-limitations">Integration and limitations</h2>
+<p>The independent local PI plugin declares the MCP server and maps Desktop&#39;s</p>
+<p>extension lifecycle to deja hooks. This source does not install anything into a</p>
+<p>running application. The parser registry permits compaction capture by harness</p>
+<p><code>pi-desktop</code> and the native session ID; project identity comes from SQLite.</p>
+<p>No direct index access, cloud service, native resume, source deletion/writeback,</p>
+<p>or reconstructed removed code is provided. Line-anchored Edit instructions do</p>
+<p>not prove removed bytes, so this reader does not manufacture edit spans. Memory</p>
+<p>is historical evidence, not new instructions. Test with synthetic data before</p>
+<p>explicitly authorizing an installation&#39;s private history.</p>
+
+<hr>
+<p>deja reads this format and 42 others, and turns what it finds into memory your
+agents can search. See the <a href="../guide/harnesses.html">harness matrix</a> for what is
+wired where, or <a href="../guide/getting-started.html">install it</a> and search your own
+history.</p>
+<p class="star-cta">Found this useful? <a href="https://github.com/vshulcz/deja-vu">Star deja-vu on GitHub</a>.</p>
+</article>
+</div>
+</div>
+<footer>deja-vu is MIT-licensed and runs on your machine. <a href="https://github.com/vshulcz/deja-vu">Source on GitHub</a> · <a href="../">Home</a></footer>
+<script src="../assets/guide.js" defer></script>
+</body>
+</html>

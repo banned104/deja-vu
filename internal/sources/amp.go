@@ -56,7 +56,7 @@ func ampDataHome() string {
 // directory without threads is the current client, not an unused one. Reading
 // them needs `amp threads export` and a login, which deja does not do (#4355).
 func AmpThreadsServerSide() bool {
-	if os.Getenv("DEJA_AMP_ROOT") != "" || len(AmpThreadFiles()) > 0 {
+	if sourcePathOverride("DEJA_AMP_ROOT") != "" || len(AmpThreadFiles()) > 0 {
 		return false
 	}
 	fi, err := os.Stat(ampDataHome())

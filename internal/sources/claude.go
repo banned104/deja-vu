@@ -62,7 +62,7 @@ func claudeProjectsDirName() string {
 // pins the store, and adding the machine's own directories to it would let the
 // real history into an isolated run.
 func ClaudeRoots() []string {
-	if p := os.Getenv("DEJA_CLAUDE_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_CLAUDE_ROOT"); p != "" {
 		return []string{p}
 	}
 	cfg := ClaudeConfigDir()
@@ -172,7 +172,7 @@ func ClaudeSidecarFiles() []string {
 // and the stats and the cc-mirror listing per file were most of the time a
 // command spent on 27,000 sessions before it searched.
 func UnderClaudeRoot(p string) bool {
-	if r := os.Getenv("DEJA_CLAUDE_ROOT"); r != "" {
+	if r := sourcePathOverride("DEJA_CLAUDE_ROOT"); r != "" {
 		return strings.HasPrefix(p, r)
 	}
 	cfg := ClaudeConfigDir()

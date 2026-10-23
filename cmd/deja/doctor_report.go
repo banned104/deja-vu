@@ -542,6 +542,7 @@ func doctorStoreChecks() []doctorStoreCheck {
 		{"continue", []string{filepath.Join(sources.ContinueRoot(), "sessions")}, sources.ContinueSessionFiles, sources.ParseContinueFile},
 		{"crush", []string{sources.CrushDataHome()}, sources.CrushDBs, sources.ParseCrushDB},
 		{"pi", []string{sources.PiRoot()}, sources.PiSessionFiles, sources.ParsePiFile},
+		{"pi-desktop", []string{sources.PiDesktopRoot()}, sources.PiDesktopSessionFiles, sources.ParsePiDesktopFile},
 		{"omp", []string{sources.OmpRoot()}, sources.OmpSessionFiles, sources.ParseOmpFile},
 		{"prime", sources.PrimeRoots(), sources.PrimeSessionFiles, sources.ParsePrimeFile},
 		{"amp", []string{sources.AmpRoot()}, sources.AmpThreadFiles, sources.ParseAmpFile},
@@ -591,7 +592,7 @@ func doctorStoreChecks() []doctorStoreCheck {
 	// read is the noise this variable exists to remove.
 	out := make([]doctorStoreCheck, 0, len(checks))
 	for _, c := range checks {
-		if sources.StoreSilenced(c.name) {
+		if sources.StoreSilenced(c.name) || (c.name == "pi-desktop" && sources.PiDesktopRoot() == "") {
 			continue
 		}
 		check := doctorStoreCheck{name: c.name, paths: c.paths, parse: c.parse}

@@ -32,6 +32,8 @@ func TestFormatRegistryConformance(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
+	t.Setenv("DEJA_SOURCE_PATHS_FILE", filepath.Join(home, "source-paths.json"))
+	t.Setenv("PI_DESKTOP_DATA_DIR", "")
 	for _, key := range []string{
 		"AIDER_CHAT_HISTORY_FILE", "CLAUDE_CONFIG_DIR", "CODEX_HOME",
 		"CURSOR_CONFIG_DIR", "DEJA_AIDER_ROOTS", "DEJA_AMP_ROOT", "DEJA_ANTIGRAVITY_ROOT",
@@ -385,6 +387,8 @@ func parseRegistryFixtureIn(t *testing.T, id, path, work string) []model.Session
 		sessions, err = ParseDevinDB(db)
 	case "qwen":
 		sessions, err = ParseQwenFile(path)
+	case "pi-desktop":
+		sessions, err = parsePiDesktopTranscript(path, piDesktopMeta{ID: "desktop-demo", Title: "Cache decision", CWD: "/work/cache"})
 	case "pi":
 		sessions, err = ParsePiFile(path)
 	case "omp":
@@ -417,7 +421,7 @@ func parseRegistryFixtureIn(t *testing.T, id, path, work string) []model.Session
 
 // registryFixturesWithCalls are the registry fixtures whose tool calls are
 // read into work records.
-var registryFixturesWithCalls = map[string]bool{"deepseek": true, "continue": true, "trae": true, "muse": true, "codebuddy": true, "devin": true, "junie": true, "jetbrains": true, "kimi": true}
+var registryFixturesWithCalls = map[string]bool{"pi-desktop": true, "deepseek": true, "continue": true, "trae": true, "muse": true, "codebuddy": true, "devin": true, "junie": true, "jetbrains": true, "kimi": true}
 
 func validateRegistrySessions(t *testing.T, id string, sessions []model.Session) {
 	t.Helper()

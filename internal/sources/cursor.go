@@ -21,7 +21,7 @@ import (
 // ~/.cursor/projects/<encoded-path>/agent-transcripts/.
 
 func CursorUserRoot() string {
-	if v := os.Getenv("DEJA_CURSOR_ROOT"); v != "" {
+	if v := sourcePathOverride("DEJA_CURSOR_ROOT"); v != "" {
 		return v
 	}
 	h := Home()

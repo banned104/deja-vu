@@ -35,7 +35,7 @@ import (
 // CrushDataHome is where Crush keeps its own state, including the project
 // registry. DEJA_CRUSH_ROOT points a stand at another one.
 func CrushDataHome() string {
-	if p := os.Getenv("DEJA_CRUSH_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_CRUSH_ROOT"); p != "" {
 		return p
 	}
 	if xdg := os.Getenv("XDG_DATA_HOME"); xdg != "" {

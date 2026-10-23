@@ -256,6 +256,8 @@ func compactionCandidatesByID(harness, id string) []compactionCandidate {
 // read where each store keeps it — the same places resume reads it from.
 func compactionSessionWorkspace(harness, path string, s model.Session) string {
 	switch harness {
+	case "pi-desktop":
+		return PiDesktopWorkspace(path)
 	case "pi", "gjc", "kimchi", "senpi", "omp", "openclaw", "cherrystudio":
 		return PiHeaderCwd(path)
 	case "prime":

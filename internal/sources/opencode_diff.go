@@ -30,7 +30,7 @@ import (
 // DEJA_OPENCODE_DB, OPENCODE_DB, XDG_DATA_HOME — carries over without a second
 // variable to keep in step.
 func OpencodeDiffDir() string {
-	if p := os.Getenv("DEJA_OPENCODE_DIFFS"); p != "" {
+	if p := sourcePathOverride("DEJA_OPENCODE_DIFFS"); p != "" {
 		return p
 	}
 	return filepath.Join(filepath.Dir(OpencodeDB()), "storage", "session_diff")

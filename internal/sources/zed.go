@@ -41,7 +41,7 @@ import (
 // ZedRoot is Zed's data directory, following paths::data_dir() upstream.
 // DEJA_ZED_ROOT relocates it for tests and for a relocated install.
 func ZedRoot() string {
-	if p := os.Getenv("DEJA_ZED_ROOT"); p != "" {
+	if p := sourcePathOverride("DEJA_ZED_ROOT"); p != "" {
 		return p
 	}
 	return zedDataDir(runtime.GOOS)

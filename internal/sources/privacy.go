@@ -71,6 +71,13 @@ const harnessExcludePrefix = "harness:"
 // matcher below, where it matches no project anyone has.
 func ExcludedHarnesses() map[string]bool {
 	out := map[string]bool{}
+	if settings, err := ReadSourcePathSettings(); err == nil {
+		for id, entry := range settings.Agents {
+			if entry.Enabled != nil && !*entry.Enabled {
+				out[id] = true
+			}
+		}
+	}
 	for _, pattern := range ExclusionPatterns() {
 		if name := strings.TrimPrefix(pattern, harnessExcludePrefix); name != pattern {
 			if name = strings.TrimSpace(name); name != "" {

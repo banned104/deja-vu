@@ -71,6 +71,9 @@ func StoresSelected() ([]string, bool) {
 // that keep their own list of stores — doctor's checks, which carry paths and a
 // parser per store — ask this instead of filtering the registry.
 func StoreSilenced(name string) bool {
+	if configuredSourceDisabled(name) {
+		return true
+	}
 	want, ok := storesSelection()
 	if !ok {
 		return false

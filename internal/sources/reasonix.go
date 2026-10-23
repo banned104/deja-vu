@@ -149,7 +149,7 @@ func expandReasonixDir(dir string) string {
 // directory the Go rewrite used first. A pinned home or state root is an
 // isolation boundary in Reasonix's own importer, and deja respects it too.
 func reasonixLegacyRoots() []string {
-	if os.Getenv("DEJA_REASONIX_ROOT") != "" || os.Getenv("REASONIX_HOME") != "" || os.Getenv("REASONIX_STATE_HOME") != "" {
+	if sourcePathOverride("DEJA_REASONIX_ROOT") != "" || os.Getenv("REASONIX_HOME") != "" || os.Getenv("REASONIX_STATE_HOME") != "" {
 		return nil
 	}
 	cands := []string{filepath.Join(Home(), ".reasonix")}
