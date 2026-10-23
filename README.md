@@ -339,6 +339,8 @@ PI-Desktop &middot; aider &middot; Amp &middot; Antigravity &middot; Claude Code
 </details>
 <!-- matrix:end -->
 
+PI-Desktop's local integration is maintained in [`pi-desktop-plugin/`](pi-desktop-plugin/README.md), beside the other harness plugins. It connects MCP and lifecycle hooks to an externally installed Deja, shares the user's index/notes/policy, and exposes `/deja` for configuration and diagnostics; it does not bundle a second engine. The generated matrix above describes CLI wiring, not this separately imported local plugin.
+
 TRAE IDE is wired, not read: its chats are in an encrypted database. `deja install trae-ide`
 adds the MCP server and the skill, and `trae-ide-auto` adds hooks, which TRAE IDE runs only
 after you turn them on in Settings > Hooks.

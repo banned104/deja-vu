@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "local.deja-vu",
+  "name": "Deja-vu 共享记忆",
+  "version": "0.1.1",
+  "description": "复用本机已安装的 Deja-vu，通过 MCP 和会话 hooks 提供共享记忆。输入 /deja 配置与检查；不内置 EXE。",
+  "author": "Deja-vu local integration",
+  "main": "main.cjs",
+  "permissions": ["agent.extension", "mcp.server.local"],
+  "activationEvents": ["onStartup"],
+  "contributes": {
+    "agentExtensions": ["src/agent.mjs"],
+    "mcpServers": [{
+      "id": "deja",
+      "label": "Deja-vu（外部共享引擎）",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["src/mcp-bridge.mjs"],
+      "env": {}
+    }]
+  }
+}

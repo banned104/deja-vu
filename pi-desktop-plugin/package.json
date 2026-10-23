@@ -1,0 +1,11 @@
+{
+  "name": "deja-pi-desktop-plugin",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "stage": "node scripts/stage.mjs"
+  },
+  "engines": { "node": ">=22" }
+}

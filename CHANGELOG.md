@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- PI-Desktop local plugin in `pi-desktop-plugin/`, maintained beside the other
+  harness integrations. MCP and lifecycle hooks use one externally installed
+  Deja and the user's shared memory; `/deja` configures the executable, source
+  paths, data locations and explicit index updates. No native binary is bundled,
+  and automatic indexing is opt-in.
+
 ### Fixed
 
 - An `apply_patch` that renames a file (`*** Move to:`) records its hunks
