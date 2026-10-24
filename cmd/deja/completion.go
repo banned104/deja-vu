@@ -309,6 +309,7 @@ _deja() {
     'brief:recent sessions and what deja served, as text'
     'log:show what deja served to agents'
     'mcp:serve the MCP protocol'
+    'paths:manage persistent per-agent history paths'
     'remember:store a durable note'
     'restore:hand back a span an agent replaced'
     'resume:reopen a session'
@@ -732,7 +733,7 @@ func completionCommands() []string {
 	return []string{
 		"bench", "blame", "brief", "check", "completion", "ctx", "delete", "doctor", "embed",
 		"files", "fix", "forget", "friction", "handoff", "help", "how", "index",
-		"install", "last", "log", "mcp", "promote", "recall", "recap", "remember", "restore",
+		"install", "last", "log", "mcp", "paths", "promote", "recall", "recap", "remember", "restore",
 		"resume", "rules", "search", "secrets", "share", "show", "sources", "stats",
 		"statusline", "sync", "tests", "uninstall", "update", "version", "view",
 		"warmup", "wip",

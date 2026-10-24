@@ -159,6 +159,15 @@
       "indexed_sessions": 0
     },
     {
+      "name": "pi-desktop",
+      "state": "missing",
+      "paths": [
+        "<tmp>/home/.pi-desktop"
+      ],
+      "files": 0,
+      "indexed_sessions": 0
+    },
+    {
       "name": "omp",
       "state": "missing",
       "paths": [
