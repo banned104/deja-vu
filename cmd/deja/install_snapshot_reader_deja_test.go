@@ -41,6 +41,37 @@ func TestOpenClawUninstallKeepsASnapshotThatOnlyAllowsDeja(t *testing.T) {
 	}
 }
 
+// The same reader choosing deja as OpenClaw's memory plugin names it as a map
+// value, not a list item, and the first uninstall write still deleted the
+// snapshot of that config (#5308).
+func TestOpenClawUninstallKeepsASnapshotThatOnlyNamesDejaAsTheMemorySlot(t *testing.T) {
+	hermeticEnv(t)
+	path := filepath.Join(sources.OpenClawStateDir(), "openclaw.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	seed := "// user settings\n{\n  // top comment\n" +
+		"  \"agents\": {\"defaults\": {\"model\": \"anthropic/x\"}},\n" +
+		"  \"plugins\": {\"allow\": [\"my-plugin\"], \"slots\": {\"memory\": \"deja\"}, \"entries\": {\"my-plugin\": {\"enabled\": true}}, \"load\": {\"paths\": [\"/opt/my-plugin\"]}},\n" +
+		"  \"hooks\": {\"internal\": {\"enabled\": true, \"entries\": {\"session-memory\": {\"enabled\": true}}}},\n" +
+		"  \"mcp\": {\"servers\": {\"zz-mine\": {\"command\": \"my-server\"}}}\n}\n"
+	if err := os.WriteFile(path, []byte(seed), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if out, err := captureRun(t, "install", "openclaw-auto", "--no-index"); err != nil {
+		t.Fatalf("install: %v\n%s", err, out)
+	}
+	if out, err := captureRun(t, "uninstall", "openclaw-auto"); err != nil {
+		t.Fatalf("uninstall: %v\n%s", err, out)
+	}
+	if got := readFile(t, path); got != seed {
+		t.Errorf("uninstall left:\n%s\nwant:\n%s", got, seed)
+	}
+	if got := readFile(t, path+".bak"); got != seed {
+		t.Errorf("the reader's snapshot is gone or changed:\n%s", got)
+	}
+}
+
 // The name as a value of the reader's is theirs; the name as a key, or a
 // command of deja's, is deja's wiring and its snapshot still goes.
 func TestDropOwnBackupTellsTheReadersDejaFromDejas(t *testing.T) {
@@ -50,6 +81,10 @@ func TestDropOwnBackupTellsTheReadersDejaFromDejas(t *testing.T) {
 	}{
 		{"allow list naming deja", `{"plugins": {"allow": ["deja"]}}`, true},
 		{"commented allow list naming deja", "{\n  // \"deja\" goes here\n  \"plugins\": {\"allow\": [ \"deja\" ]}\n}", true},
+		{"memory slot naming deja", `{"plugins": {"slots": {"memory": "deja"}}}`, true},
+		{"memory slot naming deja beside deja's entry", `{"plugins": {"slots": {"memory": "deja"}}, "mcp": {"servers": {"deja": {"command": "/opt/x/deja", "args": ["mcp"]}}}}`, false},
+		{"deja's plugin package, named by value", `{"name": "deja", "version": "1.0.0"}`, false},
+		{"grok's server list, id and label", `{"mcp": {"servers": [{"id": "deja", "label": "deja", "command": "/opt/x/deja"}]}}`, false},
 		{"deja's entry", `{"mcpServers": {"deja": {"command": "/opt/x/deja", "args": ["mcp"]}}}`, false},
 		{"deja's entry beside the reader's allow", `{"allow": ["deja"], "mcp": {"servers": {"deja": {"command": "/opt/x/deja", "args": ["mcp"]}}}}`, false},
 		{"deja's hook behind the reader's &&", `{"allow": ["deja"], "statusLine": {"command": "cd /x && /opt/x/deja statusline"}}`, false},

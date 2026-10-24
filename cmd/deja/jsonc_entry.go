@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -215,8 +216,17 @@ func cutEntry(text string, cut [2]int) string {
 			cut[0] += nl + 1
 		}
 	}
+	trailingComma := cut[1] > 0 && text[cut[1]-1] == ','
+	// A comment after the entry on its line keeps the line and the entry's
+	// indent: the span starts at the newline in front of the key, so taking
+	// it whole joined the comment to the line before, onto an object's
+	// opening brace (#5310).
+	key := cut[0] + len(text[cut[0]:cut[1]]) - len(strings.TrimLeft(text[cut[0]:cut[1]], " \t\r\n"))
+	if (strings.HasPrefix(rest, "//") || strings.HasPrefix(rest, "/*")) && strings.HasSuffix(strings.TrimRight(text[:key], " \t"), "\n") {
+		cut = [2]int{key, len(text) - len(rest)}
+	}
 	out := text[:cut[0]] + text[cut[1]:]
-	if cut[1] > 0 && text[cut[1]-1] == ',' {
+	if trailingComma {
 		return out
 	}
 	i := cut[0] - 1
@@ -296,7 +306,9 @@ func entryAtDepth(entry string, depth int) string {
 // did not give the reader their file back.
 //
 // Whitespace only, checked on the raw text: a block holding a comment and
-// nothing else is one the reader wrote something in, and it keeps its shape.
+// nothing else is one the reader wrote something in, and it keeps its shape —
+// the one it had, so the line break install put in front of a one-line
+// block's comment goes too (see emptiedBody).
 func closeEmptied(text string, keys []string) string {
 	if len(keys) == 0 {
 		// The top-level object, for a key that lives there.
@@ -308,10 +320,7 @@ func closeEmptied(text string, keys []string) string {
 		if end < 0 {
 			return text
 		}
-		if body := text[open+1 : end-1]; body != "" && strings.TrimSpace(body) == "" {
-			text = text[:open+1] + text[end-1:]
-		}
-		return text
+		return text[:open+1] + emptiedBody(text[open+1:end-1], 0) + text[end-1:]
 	}
 	for i := len(keys); i > 0; i-- {
 		open := zedTopLevelOpen(text)
@@ -322,12 +331,27 @@ func closeEmptied(text string, keys []string) string {
 		if block == nil || have < i {
 			continue
 		}
-		body := text[block.valueOpen+1 : block.valueEnd-1]
-		if body != "" && strings.TrimSpace(body) == "" {
-			text = text[:block.valueOpen+1] + text[block.valueEnd-1:]
-		}
+		body := emptiedBody(text[block.valueOpen+1:block.valueEnd-1], i)
+		text = text[:block.valueOpen+1] + body + text[block.valueEnd-1:]
 	}
 	return text
+}
+
+// emptiedBody is what is left of a block's body once deja's entry is out of
+// it, as the block was before install. Whitespace goes. So does the newline
+// and indent install writes between its entry and a one-line block's comment,
+// `{ /* later */ }`: without it the block came back with the comment on a
+// line of its own (#5310). depth is the block's nesting, which set that
+// indent.
+func emptiedBody(body string, depth int) string {
+	if strings.TrimSpace(body) == "" {
+		return ""
+	}
+	rest, cut := strings.CutPrefix(body, "\n"+strings.Repeat("  ", depth))
+	if cut && !strings.Contains(rest, "\n") && strings.TrimSpace(stripJSONComments(rest)) == "" {
+		return rest
+	}
+	return body
 }
 
 // nestedBlocks is the text of the keys that are missing, one inside the next,
@@ -335,9 +359,9 @@ func closeEmptied(text string, keys []string) string {
 func nestedBlocks(keys []string, id, entry, indent string) string {
 	entry = strings.ReplaceAll(entry, "\n    ", "\n"+indent+strings.Repeat("  ", len(keys)))
 	body := fmt.Sprintf("%q: %s", id, entry)
-	for i := len(keys) - 1; i >= 0; i-- {
+	for i, key := range slices.Backward(keys) {
 		inner := indent + strings.Repeat("  ", i+1)
-		body = fmt.Sprintf("%q: {\n%s%s\n%s}", keys[i], inner, body, indent+strings.Repeat("  ", i))
+		body = fmt.Sprintf("%q: {\n%s%s\n%s}", key, inner, body, indent+strings.Repeat("  ", i))
 	}
 	return "\n" + indent + body
 }

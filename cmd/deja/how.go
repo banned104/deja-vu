@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -109,20 +111,20 @@ func runHow(dir string, args []string, stdout io.Writer) error {
 			// an unknown flag and an empty argument all used to pass through in
 			// silence, the same holes files had (#1630, #1628).
 			if i+1 >= len(args) {
-				return fmt.Errorf("how: --limit needs value")
+				return errors.New("how: --limit needs value")
 			}
 			i++
-			n, err := strconv.Atoi(args[i])
+			n, err := strconv.Atoi(args[i]) //nolint:gosec // i+1 < len(args) is checked above
 			if err != nil || n <= 0 {
-				return fmt.Errorf("how: --limit wants a positive number, got %q", args[i])
+				return fmt.Errorf("how: --limit wants a positive number, got %q", args[i]) //nolint:gosec // i+1 < len(args) is checked above
 			}
 			limit = n
 		case "--project":
-			if i+1 >= len(args) || strings.TrimSpace(args[i+1]) == "" {
-				return fmt.Errorf("how: --project needs value")
+			if i+1 >= len(args) || strings.TrimSpace(args[i+1]) == "" { //nolint:gosec // the left operand checks the bound
+				return errors.New("how: --project needs value")
 			}
 			i++
-			project = args[i]
+			project = args[i] //nolint:gosec // i+1 < len(args) is checked above
 		case "--all-projects":
 			// The answer is scoped to this project by default (#3705); this
 			// asks the machine instead.
@@ -141,7 +143,7 @@ func runHow(dir string, args []string, stdout io.Writer) error {
 		}
 	}
 	if len(terms) == 0 {
-		return fmt.Errorf("usage: deja how <what> [--project name] [--limit n] [--json]")
+		return errors.New("usage: deja how <what> [--project name] [--limit n] [--json]")
 	}
 	if err := index.Ensure(dir, "", false, os.Stderr); err != nil {
 		return ensureError(dir, err)
@@ -382,7 +384,16 @@ func howScope(cwd, project string, allProjects bool) []string {
 	if cwd == "" {
 		return nil
 	}
-	return digest.ProjectNameCandidates(cwd)
+	names := digest.ProjectNameCandidates(cwd)
+	// The name the rows show goes first, for howScopeName. The candidates
+	// open with the Claude-encoded reading of the directory, which turns a
+	// hyphen into a slash: the footer said "in my/app only", a name no row
+	// shows and --project does not take (#5321). The order does not change
+	// what matches; every name is tried.
+	if label := digest.ProjectLabel(cwd); label != "" {
+		names = append([]string{label}, slices.DeleteFunc(names, func(name string) bool { return name == label })...)
+	}
+	return names
 }
 
 // howCwd is the directory the answer is about. A caller with none — a daemon, a

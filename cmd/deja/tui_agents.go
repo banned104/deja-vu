@@ -21,6 +21,7 @@ var agentNames = map[string]string{
 	"zcode": "ZCode", "kiro": "Kiro", "kilocode": "Kilo Code", "roo": "Roo Code", "zed": "Zed",
 	"devin": "Devin CLI", "codewhale": "CodeWhale", "junie": "Junie", "jetbrains": "JetBrains AI Assistant",
 	"windsurf": "Windsurf / Devin Desktop", "codebuddy": "CodeBuddy Code", "reasonix": "Reasonix", "trae": "TRAE CLI", "muse": "Muse Code",
+	"mcode": "MiniMax Code",
 }
 
 // agentName is the short form for a chip or a card: the parenthesised gloss
@@ -60,8 +61,9 @@ func continueTargets(lookPath func(string) (string, error), used map[string]int)
 	if lookPath == nil {
 		lookPath = exec.LookPath
 	}
-	var out []continueTarget
-	for _, id := range handoffTargets() {
+	targets := handoffTargets()
+	out := make([]continueTarget, 0, len(targets)+len(handoffPasteOnly))
+	for _, id := range targets {
 		t := continueTarget{id: id}
 		if argv, ok := handoffCommand(id, ""); ok && len(argv) > 0 {
 			_, err := lookPath(argv[0])

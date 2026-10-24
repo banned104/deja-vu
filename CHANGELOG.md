@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- A cold build keys messages without allocating a string per word, so the
+  indexing phase takes half the CPU. On a 12,000-session Codex store it drops
+  from 9.3 s to 4.2 s and the whole build from 273 to 215 CPU-seconds (#5567).
+
 ### Added
 
 - PI-Desktop local plugin in `pi-desktop-plugin/`, maintained beside the other
@@ -14,19 +20,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Deja and the user's shared memory; `/deja` configures the executable, source
   paths, data locations and explicit index updates. No native binary is bundled,
   and automatic indexing is opt-in.
+- MiniMax Code: sessions under `~/.minimax/v2/sessions` are indexed with the
+  person's own words rather than the runtime's reminders, `deja resume` prints
+  `mcode --session <id>`, and `deja install mcode` / `mcode-auto` write the MCP
+  entry and a hook plugin. From @yangala (#5593).
+- `~/.config/deja/projects` names a directory tree as one project, one `<path> = <name>` per line. Every checkout and worktree under a listed path is indexed under that name, and the hooks and recall standing anywhere in it scope to all of them. Editing the file renames nothing already indexed: `deja index` and `deja doctor` say a rebuild is due, `deja index --rebuild` renames the sessions whose transcripts are still on disk, and sessions indexed before the file existed still match from their own checkout until then. The exclude file wins over an alias, so a repository excluded by its own name stays out. From @Maweill (#5097, #5373).
+- `deja search --sort date` lists the newest match first, in the text and in
+  `--json`, and `^s` in the search screen turns the list newest first under
+  day headings and back. On a common word the page is the newest of the whole
+  match, not the newest of the best-ranked thousand (#5577).
+- A cold build reads each transcript line once instead of handing it to six
+  readers that each decoded it again, and checks tool output for known errors
+  in one pass per line. On 40,000 sessions it takes 60 s instead of 87 s and
+  353 CPU-seconds instead of 551 (#5586).
 
 ### Fixed
 
+- `deja install codex` no longer writes `type = "stdio"` into
+  `[mcp_servers.deja]`. Codex 0.163 warned the key is not a setting it knows,
+  and picks stdio from `command` anyway. A reinstall drops the line from an
+  older block. Reported by @j2h4u (#5590).
+- `deja fix`, `deja friction` and the hook at a failed command now know the
+  errors a package install hits behind a mirror or a proxy: pip's "No matching
+  distribution found", an HTTP 403 or 401 from an index, an unresolvable host,
+  an untrusted certificate, a failed docker build step and npm's error codes.
+  `pip3`, `pip config`, conda and apt installs are kept as remedies, so the
+  install that worked against the mirror is what `deja fix` names (#5599).
+- A first build large enough to answer early no longer forgets the malformed
+  lines, unreadable files and rollouts waiting for zstd it found, so doctor
+  still reports them (#5110).
 - An `apply_patch` that renames a file (`*** Move to:`) records its hunks
   under the new name, so `deja blame` and `deja restore` find them there.
   Codex, opencode, Copilot CLI, OpenClaw, pi, Cline, Roo and Amp filed them
   under the old path (#595).
+- `deja blame` attributes lines written by CodeWhale's `write_file` and
+  `fim_edit` (the latter read from its result), and `deja blame` and
+  `deja restore` see the symbol a Crush `lsp_replace_symbol` replaced (from
+  the result's metadata) and the lines a Reasonix `delete_symbol` cut (from
+  the diff it returns). Each kept only the path, or only the written side
+  (#595).
 - `deja blame` attributes a line a Copilot agent wrote with
   `insert_edit_into_file`. The transcript reader kept only the file's path
   (#595).
 - A transcript with nothing to index, such as one tool result that was only a
   `<deja-recall>` block, no longer gets an empty session in `deja last` from
   an incremental pass. A rebuild never listed it (#5563).
+- The `deja_recall` tool in the dsh, opencode, OpenClaw and Hermes plugins
+  answers with the MCP recall page, about 4 KB, and takes an `offset` for the
+  next one. dsh and opencode handed the model `search --json`: 222,536
+  characters for five hits on a test store. `deja recall` takes `--offset`
+  (#5568).
+- The skills' shell fallback is `deja recall`, not `deja --framed search
+  --json`, which ran to 222,546 bytes for one query on the same store against
+  4,097 (#5578). The Devin plugin's copy of the skill had drifted and is
+  current again.
+- A recall page that names a session matched more often than it can quote
+  says to call recall with that id, not recall_context, which the OpenClaw and
+  Hermes plugins do not have. Recall opens any id recall_context would,
+  including a Devin subagent's (#5579).
 
 ## [0.23.1] - 2026-10-22
 

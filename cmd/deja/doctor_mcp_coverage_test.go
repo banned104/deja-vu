@@ -58,11 +58,11 @@ func writesMCPServer(t *testing.T, target string) bool {
 	found := false
 	_ = filepath.Walk(home, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() || found {
-			return nil
+			return nil //nolint:nilerr // unreadable entries are skipped
 		}
-		b, err := os.ReadFile(path)
+		b, err := os.ReadFile(path) //nolint:gosec // the test walks its own temp tree
 		if err != nil {
-			return nil
+			return nil //nolint:nilerr // unreadable entries are skipped
 		}
 		text := string(b)
 		if strings.Contains(text, `"deja"`) && strings.Contains(text, "mcp") ||
@@ -188,7 +188,8 @@ func TestTheCommandIsReadableUnderNestedMCPServers(t *testing.T) {
 
 // A TOML table keeps every key at the header's own indent, so the scan that
 // looked for the command *under* the anchor stopped at the first sibling that
-// was not one — `type = "stdio"`, the line codex writes right after the header.
+// was not one — `type = "stdio"`, the line codex installs before #5590 wrote
+// right after the header.
 // A codex config whose command is not the first key read as naming no binary at
 // all, and the row said `wired` about a build in a scratch directory (#3668).
 func TestTheCommandIsReadableAnywhereInATOMLTable(t *testing.T) {
@@ -288,7 +289,7 @@ func TestTheCommandIsReadableUnderDejasOtherKeys(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(plain, b, 0o600); err != nil {
+	if err = os.WriteFile(plain, b, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if got := dejaCommandIn(plain); got != stray {

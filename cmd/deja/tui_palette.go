@@ -43,6 +43,11 @@ func (a *tuiApp) paletteItems() []paletteItem {
 			add("Show "+strings.ToLower(n[:1])+n[1:], "tab", func() { a.view = viewList; a.setScope(scope) })
 		}
 	}
+	if a.byDate {
+		add("Sort results by best match", "^s", a.toggleSort)
+	} else {
+		add("Sort results newest first", "^s", a.toggleSort)
+	}
 	add("Filter by agent…", "a", func() { a.openModal(modalAgents) })
 	add("Agent history paths…", "P", a.openPaths)
 	if len(a.filter) > 0 {
@@ -84,7 +89,7 @@ func (a *tuiApp) openPalette() {
 
 func (a *tuiApp) handlePalette(ev tui.Event) {
 	items := a.shownPalette()
-	switch ev.Key {
+	switch ev.Key { //nolint:exhaustive // other keys do nothing here
 	case tui.KeyEsc:
 		a.modal = modalNone
 	case tui.KeyUp:

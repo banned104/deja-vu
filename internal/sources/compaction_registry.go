@@ -121,16 +121,16 @@ func compactionKindMatches(k FileKind, path string) string {
 // matched a root and Grok's capture failed with transcript_unavailable.
 func compactionPathSpellings(path string) []string {
 	out := []string{path}
-	real, err := filepath.EvalSymlinks(path)
+	resolved, err := filepath.EvalSymlinks(path)
 	if err != nil {
 		return out
 	}
-	if real != path {
-		out = append(out, real)
+	if resolved != path {
+		out = append(out, resolved)
 	}
 	home := Home()
 	if realHome, err := filepath.EvalSymlinks(home); err == nil && realHome != home {
-		if rel, err := filepath.Rel(realHome, real); err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		if rel, err := filepath.Rel(realHome, resolved); err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 			out = append(out, filepath.Join(home, rel))
 		}
 	}
@@ -289,6 +289,8 @@ func compactionSessionWorkspace(harness, path string, s model.Session) string {
 		return cwd
 	case "claude":
 		return ClaudeSessionDir(path)
+	case "mcode":
+		return McodeSessionWorkspace(s.ID)
 	}
 	// opencode-shaped stores keep the directory as the session's path.
 	if s.Path != "" && s.Path != path {

@@ -154,6 +154,11 @@ func TestAJSONCStatusLineRoundTripsEveryShape(t *testing.T) {
 		{"nested, ui the last key", []string{"ui", "statusLine"}, "{ // c\n  \"model\": \"x\",\n  \"ui\": {}\n}\n", "{ // c\n  \"model\": \"x\"\n}\n"},
 		{"comment between the last two keys", []string{"statusLine"}, "{\n  \"model\": \"x\",\n  // note\n  \"theme\": \"dark\"\n}\n", ""},
 		{"block comment before the null", []string{"statusLine"}, "{\n  \"statusLine\": /* x */ null,\n  \"a\": 1\n}\n", "{\n  \"a\": 1\n}\n"},
+		// A comment after the key's comma stays on the line it was on,
+		// rather than joining the object's opening brace (#5310).
+		{"line comment after the null", []string{"statusLine"}, "{\n  \"statusLine\": null, // off until I pick one\n  \"theme\": \"dark\"\n}\n", "{\n  // off until I pick one\n  \"theme\": \"dark\"\n}\n"},
+		// And a one-line block holding only a comment comes back on one line.
+		{"one-line ui holding a comment", []string{"ui", "statusLine"}, "{\n  \"ui\": { /* later */ }\n}\n", ""},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "settings.json")
@@ -195,7 +200,7 @@ func TestClearingCopilotHooksKeepsTheReadersComment(t *testing.T) {
 		t.Fatal(err)
 	}
 	root := map[string]any{"hooks": map[string]any{"a": []any{map[string]any{"bash": "a && b"}}}}
-	got, err := dropCopilotHooksJSONC(text, was["hooks"].(map[string]any), root)
+	got, err := dropCopilotHooksJSONC(text, typedOrFatal[map[string]any](t, was["hooks"]), root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,6 +210,60 @@ func TestClearingCopilotHooksKeepsTheReadersComment(t *testing.T) {
 	var back map[string]any
 	if err := json.Unmarshal([]byte(stripJSONComments(got)), &back); err != nil {
 		t.Errorf("not JSON: %v\n%s", err, got)
+	}
+}
+
+// The reader's comments inside a list they share with deja stay where they
+// were written, and the list is not written again on one line (#5312).
+func TestClearingCopilotHooksKeepsCommentsInsideTheSharedList(t *testing.T) {
+	deja := "/usr/local/bin/deja hook-context --copilot"
+	for _, tc := range []struct{ name, list, want string }{
+		{
+			name: "deja last",
+			list: "      // mine: warm the cache first\n      {\"type\": \"command\", \"bash\": \"make warm\"},\n      {\"type\": \"command\", \"bash\": \"" + deja + "\"}\n",
+			want: "      // mine: warm the cache first\n      {\"type\": \"command\", \"bash\": \"make warm\"}\n",
+		},
+		{
+			name: "deja first",
+			list: "      {\"type\": \"command\", \"bash\": \"" + deja + "\"},\n      // mine: warm the cache first\n      {\"type\": \"command\", \"bash\": \"make warm\"}\n",
+			want: "      // mine: warm the cache first\n      {\"type\": \"command\", \"bash\": \"make warm\"}\n",
+		},
+		{
+			name: "deja between two of the reader's",
+			list: "      {\"bash\": \"a\"}, // first\n      {\"bash\": \"" + deja + "\"},\n      /* last */ {\"bash\": \"b\", /* why */ \"timeoutSec\": 5}\n",
+			want: "      {\"bash\": \"a\"}, // first\n      /* last */ {\"bash\": \"b\", /* why */ \"timeoutSec\": 5}\n",
+		},
+		{
+			name: "deja's element carries a comment of its own",
+			list: "      {\"bash\": \"a\"},\n      {\"bash\": \"" + deja + "\", /* ours */ \"type\": \"command\"}\n",
+			want: "      {\"bash\": \"a\"}\n",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			text := "{\n  // copilot settings\n  \"hooks\": {\n    \"sessionStart\": [\n" + tc.list + "    ]\n  }\n}\n"
+			var was map[string]any
+			if err := json.Unmarshal([]byte(jsoncToJSON(text)), &was); err != nil {
+				t.Fatal(err)
+			}
+			hooks := typedOrFatal[map[string]any](t, was["hooks"])
+			start := typedOrFatal[[]any](t, hooks["sessionStart"])
+			var kept []any
+			for _, e := range start {
+				m := typedOrFatal[map[string]any](t, e)
+				if b, _ := m["bash"].(string); b != deja {
+					kept = append(kept, e)
+				}
+			}
+			root := map[string]any{"hooks": map[string]any{"sessionStart": kept}}
+			got, err := dropCopilotHooksJSONC(text, typedOrFatal[map[string]any](t, was["hooks"]), root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := "{\n  // copilot settings\n  \"hooks\": {\n    \"sessionStart\": [\n" + tc.want + "    ]\n  }\n}\n"
+			if got != want {
+				t.Errorf("got:\n%s\nwant:\n%s", got, want)
+			}
+		})
 	}
 }
 

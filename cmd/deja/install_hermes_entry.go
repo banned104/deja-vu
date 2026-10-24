@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -142,8 +144,9 @@ func hermesFields(lines []string, e hermesEntry) (map[string]hermesField, string
 // hermesArgs is the list an `args:` holds, flow or block.
 func hermesArgs(lines []string, f hermesField) []string {
 	if strings.HasPrefix(f.value, "[") && strings.HasSuffix(f.value, "]") {
-		var out []string
-		for _, item := range hermesFlowSplit(f.value[1 : len(f.value)-1]) {
+		items := hermesFlowSplit(f.value[1 : len(f.value)-1])
+		out := make([]string, 0, len(items))
+		for _, item := range items {
 			out = append(out, yamlScalar(item))
 		}
 		return out
@@ -268,6 +271,18 @@ func hermesMCPOffNote(p string) string {
 	return mcpOffNote("hermes", "`mcp_servers.deja.enabled: "+v+"`", p)
 }
 
+// hermesSameEntries is true when every copy has the same value under its key:
+// the lines below it, and anything written on the key line itself.
+func hermesSameEntries(lines []string, entries []hermesEntry) bool {
+	last := entries[len(entries)-1]
+	for _, e := range entries[:len(entries)-1] {
+		if e.inline != last.inline || !slices.Equal(lines[e.start+1:e.end], lines[last.start+1:last.end]) {
+			return false
+		}
+	}
+	return true
+}
+
 // hermesEditEntry points the deja entry the reader already has at this
 // binary, in place: `command` and `args` change when they say something
 // else, and every other key — timeout, env, tools, the reader's own switch —
@@ -292,10 +307,19 @@ func hermesEditEntry(lines []string, exe string) (out []string, note string, don
 		// one Hermes reads, and dropping that one would change what runs.
 		if len(keep) == 1 && keep[0] == entries[len(entries)-1] {
 			lines = append([]string(nil), lines...)
-			for i := len(entries) - 1; i >= 0; i-- {
-				if entries[i] != keep[0] {
-					lines = append(lines[:entries[i].start], lines[entries[i].end:]...)
+			for _, entrie := range slices.Backward(entries) {
+				if entrie != keep[0] {
+					lines = append(lines[:entrie.start], lines[entrie.end:]...)
 				}
+			}
+			entries = hermesDejaEntries(lines)
+		} else if hermesSameEntries(lines, entries) {
+			// The same entry written twice, spelled `deja:` and `'deja':`
+			// or not: Hermes reads the last, so the earlier copies say
+			// nothing it does not (#5292).
+			lines = append([]string(nil), lines...)
+			for _, entrie := range slices.Backward(entries[:len(entries)-1]) {
+				lines = append(lines[:entrie.start], lines[entrie.end:]...)
 			}
 			entries = hermesDejaEntries(lines)
 		}
@@ -326,14 +350,14 @@ func hermesEditEntry(lines []string, exe string) (out []string, note string, don
 		if !ok {
 			return nil, "", false, fmt.Errorf("mcp_servers.deja is written on one line (%s), and deja edits only the block form — rewrite it that way and run this again", strings.TrimSpace(lines[e.start]))
 		}
-		out, n, done, err := hermesEditEntry(block, exe)
+		out2, n, done, err := hermesEditEntry(block, exe)
 		if err == nil && done {
 			n = strings.TrimPrefix(n+"; ", "; ") + hermesFlowRewrittenNote
 		}
-		return out, n, done, err
+		return out2, n, done, err
 	}
 	if !hermesSpanPlain(lines, e.start, e.end) {
-		return nil, "", false, fmt.Errorf("mcp_servers.deja holds a value that runs over several lines (a flow collection or a quoted string), and deja edits only one-line values — rewrite it that way and run this again")
+		return nil, "", false, errors.New("mcp_servers.deja holds a value that runs over several lines (a flow collection or a quoted string), and deja edits only one-line values — rewrite it that way and run this again")
 	}
 	fields, indent := hermesFields(lines, e)
 	if len(fields) == 0 {
@@ -497,7 +521,7 @@ func yamlDejaEntriesRemovable(text, topKey string) error {
 			return fmt.Errorf("%s holds a value that runs over several lines, and taking it out by hand is safer — remove the deja entry and run this again", name)
 		}
 		_, rest, _ := hermesKeyLine(lines[e.start])
-		for _, tok := range strings.Fields(stripYAMLComment(rest)) {
+		for tok := range strings.FieldsSeq(stripYAMLComment(rest)) {
 			if a, ok := strings.CutPrefix(tok, "&"); ok && a != "" && strings.Contains(text, "*"+a) {
 				return fmt.Errorf("%s carries the anchor &%s, which *%s still uses — remove the deja entry by hand and run this again", name, a, a)
 			}

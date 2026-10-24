@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<script>document.documentElement.className=document.documentElement.className.replace("no-js","js")</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delete Antigravity conversation history — deja-vu</title>
+<meta name="description" content="Antigravity keeps a conversation in six places under ~/.gemini/antigravity. Delete it in the app, then VACUUM the summaries database so the text is gone too.">
+<link rel="canonical" href="https://vshulcz.github.io/deja-vu/guide/delete-antigravity-history.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Delete Antigravity conversation history">
+<meta property="og:description" content="Antigravity keeps a conversation in six places under ~/.gemini/antigravity. Delete it in the app, then VACUUM the summaries database so the text is gone too.">
+<meta property="og:url" content="https://vshulcz.github.io/deja-vu/guide/delete-antigravity-history.html">
+<meta property="og:image" content="https://vshulcz.github.io/deja-vu/assets/og.png">
+<link rel="icon" type="image/svg+xml" sizes="16x16" href="../assets/favicon.svg">
+<link rel="icon" type="image/svg+xml" sizes="any" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+<meta name="author" content="vshulcz">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<meta name="theme-color" content="#0d0b16">
+<meta name="color-scheme" content="dark light">
+<meta property="og:site_name" content="deja-vu">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Delete Antigravity conversation history">
+<meta name="twitter:description" content="Antigravity keeps a conversation in six places under ~/.gemini/antigravity. Delete it in the app, then VACUUM the summaries database so the text is gone too.">
+<meta name="twitter:image" content="https://vshulcz.github.io/deja-vu/assets/og.png">
+<link rel="apple-touch-icon" href="../assets/icon.svg">
+<link rel="sitemap" type="application/xml" href="https://vshulcz.github.io/deja-vu/sitemap.xml">
+<link rel="describedby" type="text/markdown" href="https://vshulcz.github.io/deja-vu/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Delete Antigravity conversation history","description":"Antigravity keeps a conversation in six places under ~/.gemini/antigravity. Delete it in the app, then VACUUM the summaries database so the text is gone too.","url":"https://vshulcz.github.io/deja-vu/guide/delete-antigravity-history.html","inLanguage":"en","author":{"@type":"Person","name":"vshulcz"},"publisher":{"@type":"Person","name":"vshulcz"},"datePublished":"2026-10-23","dateModified": "2026-10-23","isPartOf":{"@type":"WebSite","name":"deja-vu","url":"https://vshulcz.github.io/deja-vu/"}}</script>
+</head>
+<body>
+<div class="glow"></div>
+<nav><a class="brand" href="../"><img src="../assets/icon.svg" alt="" width="22" height="22">deja-vu</a><span class="spacer"></span><a class="lnk" href="../">Home</a><a class="lnk" href="getting-started.html">Docs</a><a class="lnk" href="https://github.com/vshulcz/deja-vu">GitHub</a></nav>
+<div class="wrap"><div class="doc"><aside><a href="../">← deja-vu</a>
+<div class="grp">Guide</div>
+<a href="getting-started.html">Getting started</a>
+<a href="agents.html">Agents &amp; MCP</a>
+<a href="search.html">Search</a>
+<a href="commands.html">CLI reference</a>
+<a href="harnesses.html">Harnesses</a>
+<a href="privacy.html">Privacy</a>
+<details class="grpfold"><summary>Why agents forget <span class="n">11</span></summary>
+<a href="forgetting.html">Why agents forget</a>
+<a href="does-my-agent-remember.html">Does my agent remember?</a>
+<a href="lost-context.html">Lost context</a>
+<a href="context-window-full.html">Context window full</a>
+<a href="after-compaction.html">After compaction</a>
+<a href="repeated-mistakes.html">Repeated mistakes</a>
+<a href="switching-agents.html">Switching agents</a>
+<a href="parallel-sessions.html">Parallel sessions</a>
+<a href="rules-files.html">When CLAUDE.md grows</a>
+<a href="one-rules-file.html">One rules file</a>
+<a href="token-cost.html">What memory costs</a>
+</details>
+<details class="grpfold"><summary>Session history <span class="n">11</span></summary>
+<a href="where-sessions-are-stored.html">Where history lives</a>
+<a href="find-a-session.html">Finding a session</a>
+<a href="codex-history.html">Codex history</a>
+<a href="resume-a-session.html">Resuming a session</a>
+<a href="codex-resume-session.html">Codex resume</a>
+<a href="export-conversations.html">Exporting sessions</a>
+<a href="sync-across-machines.html">Across machines</a>
+<a href="auditing-agents.html">Auditing an agent</a>
+<a href="credentials-in-transcripts.html">Credentials in transcripts</a>
+<a href="recover-a-deleted-session.html">Recover a deleted session</a>
+<a href="no-conversation-found-claude-code.html">No conversation found</a>
+</details>
+<details class="grpfold" open><summary>Deleting sessions <span class="n">22</span></summary>
+<a href="session-files-on-disk.html">Claude Code</a>
+<a href="delete-old-claude-sessions.html">Old sessions</a>
+<a href="delete-codex-sessions.html">Codex</a>
+<a href="delete-cursor-chat-history.html">Cursor</a>
+<a href="cursor-state-vscdb-too-large.html">Cursor state.vscdb too large</a>
+<a href="delete-copilot-chat-history.html">Copilot Chat</a>
+<a href="delete-copilot-cli-session-history.html">Copilot CLI</a>
+<a href="delete-gemini-cli-history.html">Gemini CLI</a>
+<a href="delete-opencode-session-history.html">opencode</a>
+<a href="delete-cline-task-history.html">Cline</a>
+<a href="delete-roo-task-history.html">Roo Code</a>
+<a href="delete-zed-thread-history.html">Zed</a>
+<a href="delete-kilo-code-task-history.html">Kilo Code</a>
+<a href="delete-amp-thread-history.html">Amp</a>
+<a href="delete-continue-session-history.html">Continue</a>
+<a href="delete-kiro-session-history.html">Kiro</a>
+<a href="delete-kimi-code-session-history.html">Kimi Code</a>
+<a href="delete-windsurf-cascade-history.html">Windsurf</a>
+<a href="delete-qwen-code-chat-history.html">Qwen Code</a>
+<a href="delete-trae-sessions.html">TRAE CLI</a>
+<a href="delete-codebuddy-sessions.html">CodeBuddy</a>
+<a href="delete-antigravity-history.html" aria-current="page">Antigravity</a>
+</details>
+<details class="grpfold"><summary>Per-agent guides <span class="n">36</span></summary>
+<a href="memory-for-aider.html">aider</a>
+<a href="memory-for-amp.html">Amp</a>
+<a href="memory-for-antigravity.html">Antigravity</a>
+<a href="memory-for-cherrystudio.html">Cherry Studio</a>
+<a href="memory-for-claude-code.html">Claude Code</a>
+<a href="memory-for-cline.html">Cline</a>
+<a href="memory-for-codewhale.html">CodeWhale</a>
+<a href="memory-for-codex.html">Codex</a>
+<a href="memory-for-commandcode.html">Command Code</a>
+<a href="memory-for-continue.html">Continue</a>
+<a href="memory-for-copilot.html">Copilot CLI</a>
+<a href="memory-for-crush.html">Crush</a>
+<a href="memory-for-cursor.html">Cursor</a>
+<a href="memory-for-dsh.html">dsh</a>
+<a href="memory-for-gjc.html">gajae-code</a>
+<a href="memory-for-gemini.html">Gemini CLI</a>
+<a href="memory-for-goose.html">Goose</a>
+<a href="memory-for-grok.html">Grok Build</a>
+<a href="memory-for-hermes.html">Hermes</a>
+<a href="memory-for-kilocode.html">Kilo Code</a>
+<a href="memory-for-kimchi.html">Kimchi Coding</a>
+<a href="memory-for-kimi.html">Kimi Code</a>
+<a href="memory-for-kiro.html">Kiro</a>
+<a href="memory-for-omp.html">omp</a>
+<a href="memory-for-openclaw.html">OpenClaw</a>
+<a href="memory-for-opencode.html">opencode</a>
+<a href="memory-for-pi.html">pi</a>
+<a href="memory-for-prime.html">prime-agent</a>
+<a href="memory-for-qwen.html">Qwen Code</a>
+<a href="memory-for-reasonix.html">Reasonix</a>
+<a href="memory-for-roo.html">Roo Code</a>
+<a href="memory-for-senpi.html">Senpi</a>
+<a href="memory-for-copilot-chat.html">VS Code Copilot Chat</a>
+<a href="memory-for-windsurf.html">Windsurf</a>
+<a href="memory-for-zcode.html">ZCode</a>
+<a href="memory-for-zed.html">Zed</a>
+</details>
+<div class="grp">Evidence</div>
+<a href="benchmarks.html">Benchmarks</a>
+<a href="compare.html">Compare</a>
+<a href="claude-mem-alternative.html">claude-mem alternative</a>
+<a href="day-zero.html">Day zero</a>
+<div class="grp">Reference</div>
+<a href="https://github.com/vshulcz/deja-vu/blob/main/docs/ARCHITECTURE.md">Architecture</a>
+<a href="https://github.com/vshulcz/deja-vu/blob/main/docs/SECURITY-MODEL.md">Security model</a>
+<a href="../registry/README.html">Format registry</a><a class="sidecat" href="../"><img src="../assets/icon-live.svg" width="46" height="46" alt=""><span>it remembers, so you do not have to</span></a></aside><article>
+<h1>How to delete Antigravity conversation history, and what is left behind</h1>
+<p class="pagelede">use the app's Delete: a conversation is six things on disk, and even that Delete leaves its words in a database until it is vacuumed<span class="mins" data-mins></span></p>
+<p>Antigravity keeps its conversations under <code>~/.gemini/antigravity</code>, beside Gemini CLI's <code>~/.gemini/tmp</code> but separate from it. The transcript most tools read is only one of six things a conversation writes there, and the one Antigravity reopens is a different file. Everything below was checked on Antigravity 2.25.0, in October 2026; on Windows <code>~</code> is <code>%USERPROFILE%</code>.</p>
+
+<h2>Where a conversation is</h2>
+<p>Each conversation has an id, and four of the six places are named after it:</p>
+<pre>~/.gemini/antigravity/
+  brain/&lt;id&gt;/                 transcript.jsonl and transcript_full.jsonl, tool output,
+                              and the implementation_plan.md and walkthrough.md the agent wrote
+  conversations/&lt;id&gt;.db       the conversation itself, the copy Antigravity reopens
+                              (with -wal and -shm files beside it)
+  annotations/&lt;id&gt;.pbtxt      its title and when you last looked at it
+  presence/&lt;id&gt;.lock          an empty lock file
+  conversation_summaries.db   one row per conversation for the list, and a full-text
+                              search index holding every prompt and reply
+  agyhub_summaries_proto.pb   the id, title and workspace of every conversation, in one file</pre>
+<p>So <code>brain/&lt;id&gt;</code> is not the conversation. Remove it alone and the text is still in <code>conversations/&lt;id&gt;.db</code> and in the search index, and the conversation's row in the list's database stays too.</p>
+<p>To find an id, <code>deja last --harness antigravity</code> lists the conversations with their ids and first prompts. Without deja, the newest directory under <code>brain/</code> is the most recent conversation, and its <code>implementation_plan.md</code> or <code>walkthrough.md</code>, if it has one, says what it was about.</p>
+<p>Older and per-profile installs can use a differently named root, which is why deja looks under <code>~/.gemini/antigravity*</code>; the terminal client <code>agy</code> was not checked for this page.</p>
+
+<h2>How to delete one conversation</h2>
+<p>Use Antigravity's own Delete: right-click the conversation in the list, or open its <code>…</code> menu. It asks once (&ldquo;This action cannot be undone&rdquo;), and then removes all six: the <code>brain</code> directory, the <code>.db</code> with its <code>-wal</code> and <code>-shm</code>, the annotation, the lock, the conversation's rows in <code>conversation_summaries.db</code> and its entry in <code>agyhub_summaries_proto.pb</code>. The workspace and the files the agent wrote into it are not touched.</p>
+<p>Deleting by hand is the wrong tool for one conversation: its rows in <code>conversation_summaries.db</code> and its entry in <code>agyhub_summaries_proto.pb</code>, a binary file shared by every conversation, would need editing as well.</p>
+
+<h2>What the Delete leaves</h2>
+<p>The rows go, but SQLite does not erase the bytes they used. After Delete, the conversation's title and prompt were still readable as raw text inside <code>conversation_summaries.db</code> and its <code>-wal</code> file: not listed and not searchable in Antigravity, but there for anyone who opens the file in a hex editor or a recovery tool. To rewrite the database without them, quit Antigravity and run:</p>
+<pre>sqlite3 ~/.gemini/antigravity/conversation_summaries.db 'VACUUM;'</pre>
+<p>On the copy we tested, that removed every trace of the deleted conversation and left the others listed and searchable. <code>sqlite3</code> ships with macOS and most Linux distributions; on Windows it is a separate install.</p>
+<p>The IDE's <code>app_storage.json</code> (in <code>%APPDATA%\Antigravity</code> on Windows) also keeps the pane layout of each conversation you opened, under a key with its id. That is the id and nothing the conversation said.</p>
+
+<h2>How to delete all of it</h2>
+<p>Quit Antigravity, then remove the conversation stores and leave the rest of the directory, which is settings, built-in skills and the installation's own state:</p>
+<pre>cd ~/.gemini/antigravity
+rm -rf brain conversations annotations presence
+rm -f conversation_summaries.db conversation_summaries.db-wal conversation_summaries.db-shm agyhub_summaries_proto.pb</pre>
+<p>Antigravity starts normally afterwards with an empty conversation list, and creates all six again for the next conversation.</p>
+<p>Do not remove <code>~/.gemini</code> itself. <code>~/.gemini/tmp</code> is <a href="delete-gemini-cli-history.html">Gemini CLI's history</a>, and <code>~/.gemini/config/projects</code> is where Antigravity keeps the workspaces you have opened.</p>
+
+<h2>What you lose</h2>
+<p>A deleted conversation cannot be reopened; Antigravity's own Delete says it cannot be undone. The plan and walkthrough the agent wrote live in <code>brain/&lt;id&gt;</code>, not in your workspace, so they go with it; code it wrote into the workspace stays. So does what the commands it ran did, and with the transcript gone there is no longer a record of which commands those were.</p>
+
+<h2>Keeping it searchable instead</h2>
+<p><a href="https://github.com/vshulcz/deja-vu">deja</a> reads Antigravity's transcripts, alongside the other agents' histories, into one local index:</p>
+<pre>curl -fsSL https://raw.githubusercontent.com/vshulcz/deja-vu/main/install.sh | sh
+deja "the Antigravity conversation about the migration"</pre>
+<p>Indexing and search stay local and credentials are stripped. A conversation deja has already indexed stays searchable after Antigravity deletes it, and <code>deja forget</code> removes it from the index when you want it gone there too. What deja cannot do is put it back into Antigravity: the app reopens a conversation from <code>conversations/&lt;id&gt;.db</code>, which deja does not read, so deja does not write an Antigravity conversation back. Index before deleting, not after.</p>
+<p><a href="where-sessions-are-stored.html">Where every agent keeps its history</a> · <a href="memory-for-antigravity.html">Memory for Antigravity</a> · <a href="delete-gemini-cli-history.html">The same question for Gemini CLI</a> · <a href="../registry/antigravity.html">The Antigravity format</a></p>
+<p class="star-cta">Found this useful? <a href="https://github.com/vshulcz/deja-vu">Star deja-vu on GitHub</a>.</p>
+</article></div></div>
+</body></html>

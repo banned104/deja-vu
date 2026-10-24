@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/vshulcz/deja-vu/internal/sources"
 )
@@ -18,8 +20,9 @@ import (
 // to reach for it (#3651). Recall that arrives on its own is vscode-auto's
 // hook file.
 func copilotChatPromptPaths() []string {
-	var out []string
-	for _, user := range sources.CopilotChatRoots() {
+	roots := sources.CopilotChatRoots()
+	out := make([]string, 0, len(roots))
+	for _, user := range roots {
 		out = append(out, filepath.Join(user, "prompts", "deja.prompt.md"))
 	}
 	return out
@@ -63,7 +66,7 @@ func installCopilotChatPrompt(exe string, uninstall bool) (installResult, error)
 	}
 	var results []installResult
 	for _, p := range paths {
-		res, err := installTextFile(p, copilotChatPrompt(exe), uninstall)
+		res, err := installTextFile(p, copilotChatPrompt(exe), exe, uninstall)
 		if err != nil {
 			return installResult{}, err
 		}
@@ -74,12 +77,21 @@ func installCopilotChatPrompt(exe string, uninstall bool) (installResult, error)
 
 // installTextFile writes a file deja owns whole, or takes it back out: an
 // unchanged file reports unchanged, and an uninstall leaves nothing behind.
-func installTextFile(path, body string, uninstall bool) (installResult, error) {
+// exe is the binary path body was built from; a rewrite from another path
+// snapshots deja's previous text as a .bak, which uninstall must tell from the
+// reader's own copy (#5299).
+func installTextFile(path, body, exe string, uninstall bool) (installResult, error) {
 	if uninstall {
 		if _, err := os.Stat(path); err != nil {
-			return installResult{Path: path, Action: "unchanged"}, nil
+			return installResult{Path: path, Action: "unchanged"}, nil //nolint:nilerr // nothing to remove
 		}
 		if err := os.Remove(path); err != nil {
+			return installResult{}, err
+		}
+		// Put back the copy install replaced, or drop it when it holds deja's own
+		// text: the rule skills, command files and the goose recipe have had
+		// since #2600.
+		if _, err := restoreReplacedFile(path, func(b []byte) bool { return sameTextExceptExe(body, string(b), exe) }); err != nil {
 			return installResult{}, err
 		}
 		// And the directory deja made for it (#3698).
@@ -99,4 +111,33 @@ func installTextFile(path, body string, uninstall bool) (installResult, error) {
 		return installResult{}, err
 	}
 	return installResult{Path: path, Action: action}, nil
+}
+
+// sameTextExceptExe reports whether other is body as written for another binary
+// path. Only the lines that carry exe may differ, and only in that part; every
+// other line must match, so a reader's edited copy is never taken for deja's.
+// An exe that body spells with JSON escapes will not be found on its line, and
+// then the whole line has to match: the safe side, the snapshot is kept.
+func sameTextExceptExe(body, other, exe string) bool {
+	want := strings.Split(body, "\n")
+	got := strings.Split(strings.ReplaceAll(other, "\r\n", "\n"), "\n")
+	if len(want) != len(got) {
+		return false
+	}
+	for i, line := range want {
+		if line == got[i] {
+			continue
+		}
+		if exe == "" || !strings.Contains(line, exe) {
+			return false
+		}
+		parts := strings.Split(line, exe)
+		for j := range parts {
+			parts[j] = regexp.QuoteMeta(parts[j])
+		}
+		if !regexp.MustCompile("^" + strings.Join(parts, ".+") + "$").MatchString(got[i]) {
+			return false
+		}
+	}
+	return true
 }

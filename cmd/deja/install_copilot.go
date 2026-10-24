@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -232,14 +233,17 @@ func planCopilotHooks(path, exe string, uninstall bool) (copilotHooksPlan, error
 	}
 	root := map[string]any{}
 	if len(bytes.TrimSpace(source)) > 0 {
-		if err := json.Unmarshal(source, &root); err != nil {
-			return copilotHooksPlan{}, configParseError(path, err)
+		if uerr := json.Unmarshal(source, &root); uerr != nil {
+			return copilotHooksPlan{}, configParseError(path, uerr)
 		}
 		if root == nil {
 			root = map[string]any{}
 		}
 	}
-	before, _ := json.Marshal(root)
+	before, err := json.Marshal(root)
+	if err != nil {
+		return copilotHooksPlan{}, err
+	}
 	// The block as it reads now, apart from root, which the edit below
 	// changes in place: the text path compares the two.
 	var was map[string]any
@@ -278,8 +282,11 @@ func planCopilotHooks(path, exe string, uninstall bool) (copilotHooksPlan, error
 			}
 		}
 	}
-	after, _ := json.Marshal(root)
-	if string(after) == string(before) {
+	after, err := json.Marshal(root)
+	if err != nil {
+		return copilotHooksPlan{}, err
+	}
+	if bytes.Equal(after, before) {
 		return unchanged, nil
 	}
 	if jsonc {
@@ -290,9 +297,9 @@ func planCopilotHooks(path, exe string, uninstall bool) (copilotHooksPlan, error
 		if !uninstall {
 			return copilotHooksPlan{}, fmt.Errorf("%s: deja cannot add hooks to a file that carries comments — add the hook by hand, or take the comments out", path)
 		}
-		text, err := dropCopilotHooksJSONC(lfText(body), was, root)
-		if err != nil {
-			return copilotHooksPlan{}, configParseError(path, err)
+		text, derr := dropCopilotHooksJSONC(lfText(body), was, root)
+		if derr != nil {
+			return copilotHooksPlan{}, configParseError(path, derr)
 		}
 		return copilotHooksPlan{path: path, old: old, next: append([]byte(header), text...)}, nil
 	}
@@ -415,6 +422,41 @@ func copilotPowerShellCommand(exe string, args ...string) string {
 	return strings.Join(append([]string{"& '" + strings.ReplaceAll(p, "'", "''") + "'"}, args...), " ")
 }
 
+// cutCopilotHookElements takes the elements of the list spanned by at that
+// keep does not hold out of text, matching each against what is kept by value.
+// ok is false when the text does not come out as keep, and the caller writes
+// the list again.
+func cutCopilotHookElements(text string, at [2]int, keep any) (string, bool) {
+	kept, isList := keep.([]any)
+	if !isList {
+		return "", false
+	}
+	left := slices.Clone(kept)
+	next, err := jsoncCutListElements(text, at, func(elem string) bool {
+		var v any
+		if json.Unmarshal([]byte(jsoncToJSON(elem)), &v) != nil {
+			return false
+		}
+		for i, k := range left {
+			if reflect.DeepEqual(v, k) {
+				left = slices.Delete(left, i, i+1)
+				return false
+			}
+		}
+		return true
+	})
+	if err != nil || len(left) > 0 {
+		return "", false
+	}
+	// The cut list must read as keep, or the old rewrite takes over.
+	end := at[1] - (len(text) - len(next))
+	var back any
+	if end <= at[0] || json.Unmarshal([]byte(jsoncToJSON(next[at[0]:end])), &back) != nil || !reflect.DeepEqual(back, keep) {
+		return "", false
+	}
+	return next, true
+}
+
 // dropCopilotHooksJSONC takes deja's entries out of a commented hooks block:
 // an event left with nothing goes, one that keeps the reader's entries has its
 // list written again, and the block goes when deja is what added it. was is the
@@ -437,11 +479,17 @@ func dropCopilotHooksJSONC(text string, was, root map[string]any) (string, error
 			open := zedTopLevelOpen(text)
 			block, _ := walkJSONCKeys(text, open, []string{"hooks"})
 			if block == nil {
-				return "", fmt.Errorf("no hooks block to edit")
+				return "", errors.New("no hooks block to edit")
 			}
 			at := jsoncListValue(text, block, event)
 			if at == nil {
 				return "", fmt.Errorf("hooks.%s is not a list deja can edit", event)
+			}
+			// Deja's elements come out as text, so the comments the reader
+			// wrote in the list stay with their entries (#5312).
+			if cut, ok := cutCopilotHookElements(text, *at, now); ok {
+				text = cut
+				continue
 			}
 			// The reader's entries are written again, unescaped: a
 			// `&&` in their command stays readable.

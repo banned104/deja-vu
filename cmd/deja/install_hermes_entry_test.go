@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -164,6 +165,7 @@ func TestInstallHermesRefusesAnEntryItCannotEditInPlace(t *testing.T) {
 		"flow args over lines": "mcp_servers:\n  deja:\n    command: /bin/deja\n    args: [\n      serve\n    ]\n",
 		"generated copy last":  "mcp_servers:\n  deja:\n    command: /old/deja\n    args: [mcp]\n    enabled: false\n  deja:\n    command: \"/bin/deja\"\n    args:\n      - mcp\n    enabled: true\n",
 		"twice":                "mcp_servers:\n  deja:\n    command: /bin/deja\n  \"deja\":\n    command: /bin/deja\n    enabled: false\n",
+		"twice, timeouts":      "mcp_servers:\n  deja:\n    command: /old/deja\n    args: [mcp]\n    timeout: 30\n  deja:\n    command: /old/deja\n    args: [mcp]\n    timeout: 60\n",
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := hermesTestConfig(t, cfg)
@@ -305,6 +307,16 @@ func TestInstallHermesEntryShapesFromReview(t *testing.T) {
 			want:        "mcp_servers:\n  deja:   # mine\n    command: \"/bin/deja\"\n    args: [mcp]\n    timeout: 60\n",
 			uninstalled: "mcp_servers:\n",
 		},
+		"two copies of deja's own entry": {
+			cfg:         "mcp_servers:\n  deja:\n    command: \"/usr/local/bin/deja\"\n    args:\n      - mcp\n    enabled: true\n  'deja':\n    command: \"/usr/local/bin/deja\"\n    args:\n      - mcp\n    enabled: true\n",
+			want:        "mcp_servers:\n  'deja':\n    command: \"/bin/deja\"\n    args:\n      - mcp\n    enabled: true\n",
+			uninstalled: "mcp_servers:\n",
+		},
+		"two identical copies of the reader's": {
+			cfg:         "mcp_servers:\n  other:\n    command: x\n  deja:\n    command: /old/deja\n    args: [mcp]\n    timeout: 30\n  deja:\n    command: /old/deja\n    args: [mcp]\n    timeout: 30\n",
+			want:        "mcp_servers:\n  other:\n    command: x\n  deja:\n    command: \"/bin/deja\"\n    args: [mcp]\n    timeout: 30\n",
+			uninstalled: "mcp_servers:\n  other:\n    command: x\n",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := hermesTestConfig(t, tc.cfg)
@@ -322,7 +334,7 @@ func TestInstallHermesEntryShapesFromReview(t *testing.T) {
 			if _, err := installHermesMCP("/bin/deja", false); err != nil {
 				t.Fatal(err)
 			}
-			if b2, _ := os.ReadFile(path); string(b2) != string(b) {
+			if b2, _ := os.ReadFile(path); !bytes.Equal(b2, b) {
 				t.Fatalf("a second install changed the file:\n%s", b2)
 			}
 			if _, err := installHermesMCP("/bin/deja", true); err != nil {
@@ -391,7 +403,7 @@ func TestInstallHermesWritesAOneLineEntryOutAsABlock(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if again, _ := os.ReadFile(path); string(again) != string(b) || strings.Contains(res.Note, hermesFlowRewrittenNote) {
+			if again, _ := os.ReadFile(path); !bytes.Equal(again, b) || strings.Contains(res.Note, hermesFlowRewrittenNote) {
 				t.Fatalf("a second install changed it again (%q):\n%s", res.Note, again)
 			}
 		})

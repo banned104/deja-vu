@@ -64,6 +64,7 @@ func pathFieldTable() []SourcePathField {
 			{"continue", "data", "Continue home (sessions)", "directory", "DEJA_CONTINUE_ROOT", onePath(ContinueRoot)},
 			{"crush", "data", "Crush data directory (projects.json)", "directory", "DEJA_CRUSH_ROOT", onePath(CrushDataHome)},
 			{"pi", "sessions", "Session directory", "directory", "DEJA_PI_ROOT", onePath(PiRoot)},
+			{"mcode", "sessions", "Session store (v2/sessions)", "directory", "DEJA_MCODE_ROOT", onePath(McodeRoot)},
 			{"prime", "sessions", "Session directory", "directory", "DEJA_PRIME_ROOT", onePath(PrimeRoot)},
 			{"qwen", "data", "Qwen home (projects)", "directory", "DEJA_QWEN_ROOT", onePath(QwenRoot)},
 			{"cherrystudio", "roots", "Agent transcript roots (one per line)", "directories", "DEJA_CHERRYSTUDIO_ROOTS", CherryStudioAllRoots},

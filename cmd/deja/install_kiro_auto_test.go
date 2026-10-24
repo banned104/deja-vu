@@ -210,3 +210,58 @@ func TestKiroAutoDefaultAgent(t *testing.T) {
 		t.Errorf("uninstall changed a default that was not deja's:\n%s", got)
 	}
 }
+
+func TestKiroAutoUninstallPrunesSettingsDirectory(t *testing.T) {
+	hermeticEnv(t)
+	if _, err := captureRun(t, "install", "kiro-auto", "--no-index"); err != nil {
+		t.Fatal(err)
+	}
+	settings := filepath.Join(kiroTestDir(t), "settings")
+	if _, err := os.Stat(settings); err != nil {
+		t.Fatalf("settings not created by install: %v", err)
+	}
+	if _, err := captureRun(t, "uninstall", "kiro-auto"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(settings); !os.IsNotExist(err) {
+		t.Errorf("uninstall left the empty settings directory behind: %v", err)
+	}
+}
+
+func TestKiroAutoUninstallKeepsSettingsHoldingUserFiles(t *testing.T) {
+	hermeticEnv(t)
+	if _, err := captureRun(t, "install", "kiro-auto", "--no-index"); err != nil {
+		t.Fatal(err)
+	}
+	settings := filepath.Join(kiroTestDir(t), "settings")
+	userFile := filepath.Join(settings, "custom.json")
+	if err := os.WriteFile(userFile, []byte(`{"custom": true}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := captureRun(t, "uninstall", "kiro-auto"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(settings); err != nil {
+		t.Errorf("uninstall removed settings directory holding user files: %v", err)
+	}
+	if _, err := os.Stat(userFile); err != nil {
+		t.Errorf("user file in settings was removed: %v", err)
+	}
+}
+
+func TestKiroUninstallPrunesSettingsDirectory(t *testing.T) {
+	hermeticEnv(t)
+	if _, err := captureRun(t, "install", "kiro", "--no-index"); err != nil {
+		t.Fatal(err)
+	}
+	settings := filepath.Join(kiroTestDir(t), "settings")
+	if _, err := os.Stat(settings); err != nil {
+		t.Fatalf("settings not created by install: %v", err)
+	}
+	if _, err := captureRun(t, "uninstall", "kiro"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(settings); !os.IsNotExist(err) {
+		t.Errorf("uninstall left the empty settings directory behind: %v", err)
+	}
+}

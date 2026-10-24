@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"io/fs"
 	"os"
@@ -515,8 +516,7 @@ func collectDoctorEmbed(dir string) *doctorEmbedReport {
 const ampServerSideNote = "Amp since 2026-03-31 keeps threads on ampcode.com, not on disk"
 
 func doctorStoreChecks() []doctorStoreCheck {
-	aiderPaths := []string{sources.Home()}
-	aiderPaths = append(aiderPaths, filepath.SplitList(os.Getenv("DEJA_AIDER_ROOTS"))...)
+	aiderPaths := append([]string{sources.Home()}, filepath.SplitList(os.Getenv("DEJA_AIDER_ROOTS"))...)
 	// The file lists are read only for a store that is read: listing an
 	// excluded one walked it on every `deja index` and doctor (#5394).
 	checks := []struct {
@@ -578,6 +578,7 @@ func doctorStoreChecks() []doctorStoreCheck {
 		{"windsurf", []string{sources.WindsurfRoot()}, sources.WindsurfSessionFiles, sources.ParseWindsurfFile},
 		{"reasonix", sources.ReasonixRoots(), sources.ReasonixSessionFiles, sources.ParseReasonixFile},
 		{"muse", sources.MuseRoots(), sources.MuseSessionFiles, sources.ParseMuseFile},
+		{"mcode", []string{sources.McodeRoot()}, sources.McodeSessionFiles, sources.ParseMcodeFile},
 		{"deepseek", []string{sources.DeepSeekRoot()}, sources.DeepSeekSessionFiles, sources.ParseDeepSeekFile},
 		// Zed keeps one SQLite store rather than session files, so the file
 		// list is the database itself — the shape opencode's row uses.
@@ -805,7 +806,7 @@ func probeDoctorStore(check doctorStoreCheck) (store doctorStore, mod time.Time,
 			}
 			_, err = f.Readdirnames(1)
 			_ = f.Close()
-			if err != nil && err != io.EOF && os.IsPermission(err) {
+			if err != nil && !errors.Is(err, io.EOF) && os.IsPermission(err) {
 				return denyRoot(path)
 			}
 		}
@@ -1009,6 +1010,7 @@ func inspectDoctorIndex(dir string, storeMods []time.Time) doctorIndexReport {
 		result.Format = "older-rules"
 	case index.ReadStateNewer:
 		result.Format = "newer"
+	case index.ReadStateCurrent:
 	}
 	if result.StaleStores > 0 {
 		result.State = "stale"
@@ -1115,8 +1117,8 @@ func collectDoctorVersion(lookup doctorVersionLookup) doctorVersionReport {
 	}
 	report.Latest = latest
 	current := normalizeUpdateVersion(version)
-	order, comparable := compareUpdateVersions(current, latest)
-	if !comparable {
+	order, ordered := compareUpdateVersions(current, latest)
+	if !ordered {
 		if current == "dev" || current == "" {
 			report.State = "dev"
 		}

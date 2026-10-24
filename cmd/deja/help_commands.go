@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -49,7 +50,7 @@ var helpEntries = []helpEntry{
 	{name: "search", group: groupSearch,
 		usage:    []string{"deja search [flags] <query>"},
 		desc:     "same as deja <query>, for a query that starts with -",
-		examples: []string{`deja search -- "--force-with-lease"`, `deja search --harness codex --since 30d "stale connection"`}},
+		examples: []string{`deja search -- "--force-with-lease"`, `deja search --harness codex --since 30d "stale connection"`, `deja search --sort date "pgx pool"`}},
 	{name: "show", group: groupSearch,
 		usage:    []string{"deja show <id-prefix> [--json] [--harness name] [--offset n] [--limit n]"},
 		desc:     "read one session, message by message",
@@ -66,7 +67,7 @@ var helpEntries = []helpEntry{
 		more:     "A query prints the best-matching session's digest, an id that session's; then the code the session changed, each edit as the lines it removed and added.",
 		examples: []string{`deja ctx "schema migration rollback" > deja-context.md`, "deja ctx 01a00feb"}},
 	{name: "recall", group: groupSearch,
-		usage:    []string{"deja recall <words> [--project name] [--harness name] [--limit n]"},
+		usage:    []string{"deja recall <words> [--project name] [--harness name] [--limit n] [--offset n]"},
 		desc:     "the page the MCP recall tool gives an agent",
 		more:     "About 4 KB, this project first. For skills and scripts that reach deja through the shell rather than MCP.",
 		examples: []string{`deja recall "pgbouncer prepared statements"`}},
@@ -289,11 +290,11 @@ var helpEntries = []helpEntry{
 		desc:     "repeated errors on the things a plan from stdin names",
 		examples: []string{"deja check - < plan.md"}},
 	{name: "hook-prompt", group: groupAgents,
-		usage:    []string{"deja hook-prompt [--plain] [--junie]"},
+		usage:    []string{"deja hook-prompt [--plain] [--junie] [--mcode]"},
 		desc:     "per prompt: recall for what was asked",
 		examples: []string{"deja hook-prompt --plain < payload.json"}},
 	{name: "hook-context", group: groupAgents,
-		usage:    []string{"deja hook-context [--plain] [--once] [--strict] [--copilot] [--notes] [--junie]"},
+		usage:    []string{"deja hook-context [--plain] [--once] [--strict] [--copilot] [--notes] [--junie] [--mcode]"},
 		desc:     "session start: the project digest, once",
 		examples: []string{"deja hook-context --plain < payload.json"}},
 	{name: "hook-antigravity", group: groupAgents,
@@ -305,11 +306,11 @@ var helpEntries = []helpEntry{
 		desc:     "before a plan runs: what history says about it",
 		examples: []string{"deja hook-plan < payload.json"}},
 	{name: "hook-tool", group: groupAgents,
-		usage:    []string{"deja hook-tool [--plain] [--crush] [--junie]"},
+		usage:    []string{"deja hook-tool [--plain] [--crush] [--junie] [--mcode]"},
 		desc:     "before a command or edit: what it already has",
 		examples: []string{"deja hook-tool --plain < payload.json"}},
 	{name: "hook-tool-after", group: groupAgents,
-		usage:    []string{"deja hook-tool-after [--plain] [--copilot]"},
+		usage:    []string{"deja hook-tool-after [--plain] [--copilot] [--mcode]"},
 		desc:     "after a failed command: what followed it before",
 		examples: []string{"deja hook-tool-after --plain < payload.json"}},
 }
@@ -338,7 +339,7 @@ func runToolHelp(name string, rest []string) error {
 	if err != nil {
 		return fmt.Errorf("%s is not on PATH: %w — `deja help %s` is deja's page for it", name, err, name)
 	}
-	cmd := exec.Command(bin, rest...)
+	cmd := exec.CommandContext(context.Background(), bin, rest...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
@@ -353,6 +354,7 @@ var searchFlagRows = [][2]string{
 	{"", "(tool output), files, command, edit, summary"},
 	{"--session <id>", "only one session, by the id a hit prints"},
 	{"--limit <1-100>", "max sessions to return (default 15)"},
+	{"--sort <order>", "relevance (default), or date: newest first"},
 	{"--all", "every match, no cap"},
 	{"--re", "treat the query as a regular expression"},
 	{"--json", "machine-readable output"},
@@ -477,7 +479,7 @@ func proseWidth() int {
 func wrapProse(s string, width int) string {
 	var lines []string
 	cur := ""
-	for _, w := range strings.Fields(s) {
+	for w := range strings.FieldsSeq(s) {
 		if cur != "" && len([]rune(cur))+1+len([]rune(w)) > width {
 			lines = append(lines, cur)
 			cur = w

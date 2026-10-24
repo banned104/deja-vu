@@ -185,6 +185,10 @@ func runHookToolAfterMode(dir string, stdin io.Reader, stdout io.Writer, plain b
 		emitCopilotContext(stdout, payload)
 		return nil
 	}
+	if mcodeHookOutput {
+		emitMcodeContext(stdout, replyEventName(input.HookEventName, "PostToolUse", "PostToolUse", "PostToolUseFailure"), payload)
+		return nil
+	}
 	var resp sessionStartHookResponse
 	// The event it was sent. Claude Code fires PostToolUseFailure for a command
 	// that exited non-zero and drops a reply naming any other event (#4488);
@@ -193,7 +197,7 @@ func runHookToolAfterMode(dir string, stdin io.Reader, stdout io.Writer, plain b
 	resp.HookSpecificOutput.AdditionalContext = payload
 	b, err := json.Marshal(resp)
 	if err != nil {
-		return nil
+		return nil //nolint:nilerr // a reply that cannot marshal means no reply
 	}
 	fmt.Fprintln(stdout, string(b))
 	return nil
@@ -415,7 +419,7 @@ func unescapeJSONString(s string) string {
 // unescapedQuote returns the index of the first quote not preceded by an odd
 // number of backslashes, or -1.
 func unescapedQuote(s string) int {
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		if s[i] != '"' {
 			continue
 		}
