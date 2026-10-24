@@ -44,7 +44,7 @@ func TestTUIDefaultDesktopStoreVisible(t *testing.T) {
 		t.Fatalf("standalone index omitted Desktop sessions: %+v", a.allMeta)
 	}
 	a.openModal(modalAgents)
-	wantOnScreen(t, screen(a.frame(140, 36)), "PI-Desktop", "43 supported", "1 with sessions here")
+	wantOnScreen(t, screen(a.frame(140, 36)), "PI-Desktop", "44 supported", "1 with sessions here")
 	if len(a.m.ids) != 1 || a.m.ids[0] != "pi-desktop" {
 		t.Fatalf("picker IDs: %v", a.m.ids)
 	}

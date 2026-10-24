@@ -400,7 +400,7 @@ func TestTUIAgentsFilter(t *testing.T) {
 	a := newTestTUI(t, dir)
 	a.listFocus = true
 	a.handle(tui.Event{Kind: tui.EvKey, Key: tui.KeyRune, Rune: 'a'})
-	wantOnScreen(t, screen(a.frame(120, 36)), "Agents", "43 supported")
+	wantOnScreen(t, screen(a.frame(120, 36)), "Agents", "44 supported")
 	a.handle(tui.Event{Kind: tui.EvKey, Key: tui.KeyRune, Rune: ' '})
 	a.handle(tui.Event{Kind: tui.EvKey, Key: tui.KeyRune, Rune: ' '})
 	a.handle(tui.Event{Kind: tui.EvKey, Key: tui.KeyRune, Rune: 'x'})
